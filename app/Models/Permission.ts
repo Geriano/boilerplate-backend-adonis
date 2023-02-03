@@ -5,7 +5,11 @@ export default class Permission extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
-  @column()
+  @column({
+    serialize(value: string) {
+      return value.toLowerCase()
+    },
+  })
   public name: string
 
   @column.dateTime({ autoCreate: true })
