@@ -1,0 +1,12 @@
+name: 'boilerplate'
+version: '3.1'
+services:
+  database:
+    container_name: boilerplate-database
+    image: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: boilerplate_node
+    ports:
+      - 5432:5432
