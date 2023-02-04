@@ -25,3 +25,5 @@ services:
       PG_DB_NAME: boilerplate_node
     ports:
       - 3333:3333
+    volumes:
+      - .:/app
