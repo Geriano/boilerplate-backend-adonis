@@ -5,8 +5,14 @@ import Permission from 'App/Models/Permission'
 import Env from '@ioc:Adonis/Core/Env'
 
 export default class PermissionController {
-  public async all() {
-    return Permission.all()
+  public async all({ response }: HttpContextContract) {
+    try {
+      return response.ok(await Permission.all())
+    } catch (e) {
+      return response.internalServerError({
+        message: `${e}`,
+      })
+    }
   }
 
   public async store({ request, response }: HttpContextContract) {
@@ -29,14 +35,14 @@ export default class PermissionController {
 
       await transaction.commit()
 
-      return response.status(201).send({
+      return response.created({
         message: `permission ${permission.name} has been created`,
         permission,
       })
     } catch (e) {
       await transaction.rollback()
 
-      return response.status(500).send({
+      return response.internalServerError({
         message: `${e}`,
       })
     }
@@ -64,7 +70,7 @@ export default class PermissionController {
 
       await transaction.commit()
 
-      return response.status(201).send({
+      return response.created({
         message: `permission ${permissions
           .map((permission) => permission.name)
           .join(', ')} has been created`,
@@ -73,7 +79,7 @@ export default class PermissionController {
     } catch (e) {
       await transaction.rollback()
 
-      return response.status(500).send({
+      return response.internalServerError({
         message: `${e}`,
       })
     }
@@ -103,14 +109,14 @@ export default class PermissionController {
       permission.name = name
       await permission.save()
 
-      return response.status(200).send({
+      return response.ok({
         message: `permission ${permission.name} has been updated`,
         permission,
       })
     } catch (e) {
       await transaction.rollback()
 
-      return response.status(500).send({
+      return response.internalServerError({
         message: `${e}`,
       })
     }
@@ -127,14 +133,14 @@ export default class PermissionController {
     try {
       await permission.delete()
 
-      return response.status(200).send({
+      return response.ok({
         message: `permission ${permission.name} has been deleted`,
         permission,
       })
     } catch (e) {
       await transaction.rollback()
 
-      return response.status(500).send({
+      return response.internalServerError({
         message: `${e}`,
       })
     }
