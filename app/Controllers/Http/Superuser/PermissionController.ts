@@ -2,6 +2,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Permission from 'App/Models/Permission'
+import Env from '@ioc:Adonis/Core/Env'
 
 export default class PermissionController {
   public async all() {
@@ -76,7 +77,8 @@ export default class PermissionController {
     }
   }
 
-  public async update({ request, response }: HttpContextContract, permission: Permission) {
+  public async update({ request, response, params }: HttpContextContract) {
+    const id = params.id as string
     const { name } = await request.validate({
       schema: schema.create({
         name: schema.string({ trim: true }, [
@@ -84,19 +86,20 @@ export default class PermissionController {
           rules.unique({
             table: Permission.table,
             column: 'name',
-            whereNot: {
-              id: permission.id,
-            },
           }),
         ]),
       }),
     })
 
+    const permission = await Permission.query()
+      .whereRaw(`md5(concat(?, ${Permission.table}.id)) = ?`, [Env.get('APP_KEY'), id])
+      .firstOrFail()
+
     const transaction = await Database.beginGlobalTransaction()
 
     try {
       permission.name = name
-      permission = await permission.save()
+      await permission.save()
 
       return response.status(200).send({
         message: `permission ${permission.name} has been updated`,
@@ -110,7 +113,12 @@ export default class PermissionController {
     }
   }
 
-  public async destroy({ response }: HttpContextContract, permission: Permission) {
+  public async destroy({ response, params }: HttpContextContract) {
+    const id = params.id as string
+    const permission = await Permission.query()
+      .whereRaw(`md5(concat(?, ${Permission.table}.id)) = ?`, [Env.get('APP_KEY'), id])
+      .firstOrFail()
+
     const transaction = await Database.beginGlobalTransaction()
 
     try {
