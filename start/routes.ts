@@ -23,3 +23,18 @@ import Route from '@ioc:Adonis/Core/Route'
 Route.get('/', async () => {
   return { hello: 'world' }
 })
+
+Route.group(() => {
+  Route.group(() => {
+    Route.get('/', 'Superuser/PermissionController.all').as('all')
+    Route.post('/', 'Superuser/PermissionController.store').as('store')
+    Route.post('/multiple', 'Superuser/PermissionController.multiple').as('stores')
+    Route.put('/:id', 'Superuser/PermissionController.update').as('update-put')
+    Route.patch('/:id', 'Superuser/PermissionController.update').as('update-patch')
+    Route.delete('/:id', 'Superuser/PermissionController.destroy').as('destroy')
+  })
+    .prefix('/permission')
+    .as('permission')
+})
+  .prefix('/superuser')
+  .as('superuser')
