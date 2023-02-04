@@ -92,7 +92,7 @@ export default class PermissionController {
     })
 
     const permission = await Permission.query()
-      .whereRaw(`md5(concat(?, ${Permission.table}.id)) = ?`, [Env.get('APP_KEY'), id])
+      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Permission.table}.id)) = ?`, [id])
       .firstOrFail()
 
     const transaction = await Database.beginGlobalTransaction()
@@ -116,7 +116,7 @@ export default class PermissionController {
   public async destroy({ response, params }: HttpContextContract) {
     const id = params.id as string
     const permission = await Permission.query()
-      .whereRaw(`md5(concat(?, ${Permission.table}.id)) = ?`, [Env.get('APP_KEY'), id])
+      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Permission.table}.id)) = ?`, [id])
       .firstOrFail()
 
     const transaction = await Database.beginGlobalTransaction()
