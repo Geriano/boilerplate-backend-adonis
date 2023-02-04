@@ -31,6 +31,7 @@ export default class PermissionController {
 
       return response.status(201).send({
         message: `permission ${permission.name} has been created`,
+        permission,
       })
     } catch (e) {
       await transaction.rollback()
@@ -67,6 +68,7 @@ export default class PermissionController {
         message: `permission ${permissions
           .map((permission) => permission.name)
           .join(', ')} has been created`,
+        permissions,
       })
     } catch (e) {
       await transaction.rollback()
@@ -103,6 +105,7 @@ export default class PermissionController {
 
       return response.status(200).send({
         message: `permission ${permission.name} has been updated`,
+        permission,
       })
     } catch (e) {
       await transaction.rollback()
@@ -126,6 +129,7 @@ export default class PermissionController {
 
       return response.status(200).send({
         message: `permission ${permission.name} has been deleted`,
+        permission,
       })
     } catch (e) {
       await transaction.rollback()
