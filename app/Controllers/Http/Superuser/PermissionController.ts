@@ -30,7 +30,7 @@ export default class PermissionController {
       await transaction.commit()
 
       return response.status(201).send({
-        message: `permission ${permission.name}`,
+        message: `permission ${permission.name} has been created`,
       })
     } catch (e) {
       await transaction.rollback()
