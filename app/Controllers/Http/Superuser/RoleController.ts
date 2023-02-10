@@ -35,6 +35,7 @@ export default class RoleController {
             query.whereILike('name', `%${search || ''}%`)
           })
           .orderBy(order.key, order.dir as 'asc' | 'desc')
+          .preload('permissions', (query) => query.select(['id', 'name']))
           .paginate(page, limit)
       )
     } catch (e) {
