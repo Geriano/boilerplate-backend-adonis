@@ -16,23 +16,25 @@ export default class RoleController {
   }
 
   public async paginate({ request, response }: HttpContextContract) {
-    const { page, limit, search, order } = request.qs() as {
-      page: number
-      limit: number
-      search: string | undefined
-      order: {
-        dir: 'asc' | 'desc'
-        key: 'name'
-      }
-    }
+    const { page, limit, search, order } = await request.validate({
+      schema: schema.create({
+        page: schema.number(),
+        limit: schema.number(),
+        search: schema.string.optional(),
+        order: schema.object().members({
+          dir: schema.enum(['asc', 'desc']),
+          key: schema.enum(['name']),
+        }),
+      }),
+    })
 
     try {
       return response.ok(
         await Role.query()
           .where((query) => {
-            query.whereILike('name', `%${search}%`)
+            query.whereILike('name', `%${search || ''}%`)
           })
-          .orderBy(order.key, order.dir)
+          .orderBy(order.key, order.dir as 'asc' | 'desc')
           .paginate(page, limit)
       )
     } catch (e) {
@@ -46,7 +48,6 @@ export default class RoleController {
     const { name } = await request.validate({
       schema: schema.create({
         name: schema.string({ trim: true }, [
-          rules.required(),
           rules.unique({
             table: Role.table,
             column: 'name',
@@ -80,7 +81,6 @@ export default class RoleController {
     const { name } = await request.validate({
       schema: schema.create({
         name: schema.string({ trim: true }, [
-          rules.required(),
           rules.unique({
             table: Role.table,
             column: 'name',
