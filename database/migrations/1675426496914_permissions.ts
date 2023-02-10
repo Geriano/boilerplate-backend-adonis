@@ -9,6 +9,9 @@ export default class extends BaseSchema {
       table.bigIncrements('id')
         .unsigned()
       table.string('name')
+        .nullable()
+        .defaultTo(null)
+      table.string('key')
         .notNullable()
         .unique()
 

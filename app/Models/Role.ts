@@ -5,6 +5,7 @@ import {
   ModelQueryBuilderContract,
   beforeFetch,
   column,
+  computed,
   manyToMany,
 } from '@ioc:Adonis/Lucid/Orm'
 import { createHash } from 'crypto'
@@ -23,8 +24,22 @@ export default class Role extends BaseModel {
   })
   public id: number
 
-  @column()
-  public name: string
+  @column({
+    serializeAs: null,
+  })
+  public name: string | null
+
+  @column({
+    serialize(value: string) {
+      return value.toLowerCase()
+    },
+  })
+  public key: string
+
+  @computed()
+  public get title() {
+    return this.name || this.key
+  }
 
   @column.dateTime({
     autoCreate: true,

@@ -7,7 +7,16 @@ import Env from '@ioc:Adonis/Core/Env'
 export default class RoleController {
   public async all({ response }: HttpContextContract) {
     try {
-      return response.ok(await Role.query().select(['id', 'name']).exec())
+      const roles = await Role.query().select(['id', 'name', 'key']).exec()
+      return response.ok(
+        roles.map((role) => {
+          return {
+            id: role.id,
+            title: role.title,
+            key: role.key,
+          }
+        })
+      )
     } catch (e) {
       return response.internalServerError({
         message: `${e}`,
@@ -32,10 +41,11 @@ export default class RoleController {
       return response.ok(
         await Role.query()
           .where((query) => {
-            query.whereILike('name', `%${search || ''}%`)
+            const s = `%${search || ''}%`
+            query.whereILike('name', s).orWhereILike('key', s)
           })
           .orderBy(order.key, order.dir as 'asc' | 'desc')
-          .preload('permissions', (query) => query.select(['id', 'name']))
+          .preload('permissions', (query) => query.select(['id', 'name', 'key']))
           .paginate(page, limit)
       )
     } catch (e) {
@@ -46,12 +56,13 @@ export default class RoleController {
   }
 
   public async store({ request, response }: HttpContextContract) {
-    const { name } = await request.validate({
+    const { name, key } = await request.validate({
       schema: schema.create({
-        name: schema.string({ trim: true }, [
+        name: schema.string.nullableAndOptional({ trim: true }),
+        key: schema.string({ trim: true }, [
           rules.unique({
             table: Role.table,
-            column: 'name',
+            column: 'key',
           }),
         ]),
       }),
@@ -60,12 +71,12 @@ export default class RoleController {
     const transaction = await Database.beginGlobalTransaction()
 
     try {
-      const role = await Role.create({ name })
+      const role = await Role.create({ name, key })
 
       await transaction.commit()
 
       return response.created({
-        message: `role ${role.name} has been created`,
+        message: `role ${role.title} has been created`,
         role,
       })
     } catch (e) {
@@ -78,30 +89,34 @@ export default class RoleController {
   }
 
   public async update({ request, response, params }: HttpContextContract) {
-    const id = params.id as string
-    const { name } = await request.validate({
+    const role = await Role.query()
+      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [params.id])
+      .firstOrFail()
+
+    const { name, key } = await request.validate({
       schema: schema.create({
-        name: schema.string({ trim: true }, [
+        name: schema.string.nullableAndOptional({ trim: true }),
+        key: schema.string({ trim: true }, [
           rules.unique({
             table: Role.table,
-            column: 'name',
+            column: 'key',
+            whereNot: {
+              id: role.$attributes.id,
+            },
           }),
         ]),
       }),
     })
 
-    const role = await Role.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [id])
-      .firstOrFail()
-
     const transaction = await Database.beginGlobalTransaction()
 
     try {
-      role.name = name
+      role.key = key
+      name !== undefined && (role.name = name)
       await role.save()
 
       return response.ok({
-        message: `role ${role.name} has been updated`,
+        message: `role ${role.title} has been updated`,
         role,
       })
     } catch (e) {
@@ -114,9 +129,8 @@ export default class RoleController {
   }
 
   public async destroy({ response, params }: HttpContextContract) {
-    const id = params.id as string
     const role = await Role.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [id])
+      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [params.id])
       .firstOrFail()
 
     const transaction = await Database.beginGlobalTransaction()
@@ -125,7 +139,7 @@ export default class RoleController {
       await role.delete()
 
       return response.ok({
-        message: `role ${role.name} has been deleted`,
+        message: `role ${role.title} has been deleted`,
         role,
       })
     } catch (e) {

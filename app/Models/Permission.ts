@@ -1,5 +1,12 @@
 import { DateTime } from 'luxon'
-import { BaseModel, ManyToMany, afterCreate, column, manyToMany } from '@ioc:Adonis/Lucid/Orm'
+import {
+  BaseModel,
+  ManyToMany,
+  afterCreate,
+  column,
+  computed,
+  manyToMany,
+} from '@ioc:Adonis/Lucid/Orm'
 import { createHash } from 'crypto'
 import Env from '@ioc:Adonis/Core/Env'
 import Role from './Role'
@@ -17,11 +24,21 @@ export default class Permission extends BaseModel {
   public id: number
 
   @column({
+    serializeAs: null,
+  })
+  public name: string | null
+
+  @column({
     serialize(value: string) {
       return value.toLowerCase()
     },
   })
-  public name: string
+  public key: string
+
+  @computed()
+  public get title() {
+    return this.name || this.key
+  }
 
   @column.dateTime({
     autoCreate: true,
@@ -41,7 +58,7 @@ export default class Permission extends BaseModel {
 
   @afterCreate()
   public static async attachPermissionToSuperuser(permission: Permission) {
-    const superuser = await Role.findByOrFail('name', 'superuser')
-    await superuser.related('permissions').attach([permission.$attributes['id']])
+    const superuser = await Role.findByOrFail('key', 'superuser')
+    await superuser.related('permissions').attach([permission.$attributes.id])
   }
 }
