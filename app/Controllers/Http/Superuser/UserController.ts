@@ -28,8 +28,8 @@ export default class UserController {
             query.orWhereILike('name', s).orWhereILike('email', s).orWhereILike('username', s)
           })
           .orderBy(order.key, order.dir as 'asc' | 'desc')
-          .preload('permissions', (query) => query.select(['id', 'name']))
-          .preload('roles', (query) => query.select(['id', 'name']))
+          .preload('permissions', (query) => query.select(['id', 'name', 'key']))
+          .preload('roles', (query) => query.select(['id', 'name', 'key']))
           .paginate(page, limit)
       )
     } catch (e) {
