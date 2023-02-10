@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, ManyToMany, column, manyToMany } from '@ioc:Adonis/Lucid/Orm'
 import { createHash } from 'crypto'
 import Env from '@ioc:Adonis/Core/Env'
+import Permission from './Permission'
 
 export default class Role extends BaseModel {
   @column({
@@ -30,4 +31,7 @@ export default class Role extends BaseModel {
     serializeAs: null,
   })
   public updatedAt: DateTime
+
+  @manyToMany(() => Permission)
+  public permissions: ManyToMany<typeof Permission>
 }
