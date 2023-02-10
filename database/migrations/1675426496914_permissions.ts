@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
 export default class extends BaseSchema {
@@ -5,8 +6,11 @@ export default class extends BaseSchema {
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.bigIncrements('id').unsigned()
-      table.string('name').notNullable().unique()
+      table.bigIncrements('id')
+        .unsigned()
+      table.string('name')
+        .notNullable()
+        .unique()
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL

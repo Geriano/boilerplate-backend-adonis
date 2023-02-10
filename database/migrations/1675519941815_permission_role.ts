@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
 export default class extends BaseSchema {
@@ -5,9 +6,16 @@ export default class extends BaseSchema {
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.bigIncrements('id').unsigned()
-      table.bigInteger('permission_id').references('id').inTable('permissions').onDelete('cascade')
-      table.bigInteger('role_id').references('id').inTable('roles').onDelete('cascade')
+      table.bigIncrements('id')
+        .unsigned()
+      table.bigInteger('permission_id')
+        .references('id')
+        .inTable('permissions')
+        .onDelete('cascade')
+      table.bigInteger('role_id')
+        .references('id')
+        .inTable('roles')
+        .onDelete('cascade')
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
