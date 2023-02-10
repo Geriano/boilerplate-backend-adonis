@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import { BaseModel, ManyToMany, column, manyToMany } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, ManyToMany, afterCreate, column, manyToMany } from '@ioc:Adonis/Lucid/Orm'
 import { createHash } from 'crypto'
 import Env from '@ioc:Adonis/Core/Env'
 import Role from './Role'
@@ -38,4 +38,10 @@ export default class Permission extends BaseModel {
 
   @manyToMany(() => Role)
   public roles: ManyToMany<typeof Role>
+
+  @afterCreate()
+  public static async attachPermissionToSuperuser(permission: Permission) {
+    const superuser = await Role.findByOrFail('name', 'superuser')
+    await superuser.related('permissions').attach([permission.$attributes['id']])
+  }
 }
