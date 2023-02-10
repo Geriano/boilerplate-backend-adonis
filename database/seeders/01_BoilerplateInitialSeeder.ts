@@ -13,18 +13,46 @@ export default class extends BaseSeeder {
       password: 'password',
     })
 
+    const dev = await User.create({
+      name: 'dev',
+      email: 'dev@local.app',
+      username: 'dev',
+      password: 'password',
+    })
+
     const superuser = await Role.create({
-      name: 'superuser',
+      key: 'superuser',
+    })
+
+    const developer = await Role.create({
+      key: 'developer',
     })
 
     su.related('roles').attach([superuser.$attributes.id])
+    dev.related('roles').attach([developer.$attributes.id])
 
-    for (const permission of this.permissions) {
+    const permissions: number[] = []
+
+    for (const name of this.permissions) {
       for (const ability of ['create', 'read', 'update', 'delete']) {
-        await Permission.create({
-          name: `${ability} ${permission}`,
+        const permission = await Permission.create({
+          key: `${ability} ${name}`,
         })
+
+        if (name !== 'user') {
+          permissions.push(permission.$attributes.id)
+        }
       }
     }
+
+    for (const type of ['permission', 'role']) {
+      const permission = await Permission.create({
+        key: `configure ${type} key`,
+      })
+
+      permissions.push(permission.id)
+    }
+
+    developer.related('permissions').sync(permissions)
   }
 }
