@@ -28,7 +28,6 @@ Route.group(() => {
   Route.group(() => {
     Route.get('/', 'Superuser/PermissionController.all').as('all')
     Route.post('/', 'Superuser/PermissionController.store').as('store')
-    Route.post('/multiple', 'Superuser/PermissionController.multiple').as('stores')
     Route.put('/:id', 'Superuser/PermissionController.update').as('update')
     Route.delete('/:id', 'Superuser/PermissionController.destroy').as('destroy')
   })

@@ -48,43 +48,6 @@ export default class PermissionController {
     }
   }
 
-  public async multiple({ request, response }: HttpContextContract) {
-    const { names } = await request.validate({
-      schema: schema.create({
-        names: schema
-          .array([
-            rules.required(),
-            rules.unique({
-              table: Permission.table,
-              column: 'name',
-            }),
-          ])
-          .members(schema.string({ trim: true })),
-      }),
-    })
-
-    const transaction = await Database.beginGlobalTransaction()
-
-    try {
-      const permissions = await Permission.createMany(names.map((name) => ({ name })))
-
-      await transaction.commit()
-
-      return response.created({
-        message: `permission ${permissions
-          .map((permission) => permission.name)
-          .join(', ')} has been created`,
-        permissions,
-      })
-    } catch (e) {
-      await transaction.rollback()
-
-      return response.internalServerError({
-        message: `${e}`,
-      })
-    }
-  }
-
   public async update({ request, response, params }: HttpContextContract) {
     const id = params.id as string
     const { name } = await request.validate({
