@@ -44,6 +44,17 @@ Route.group(() => {
   })
     .prefix('/role')
     .as('role')
+
+  Route.group(() => {
+    Route.get('/', 'Superuser/UserController.paginate').as('paginate')
+    Route.post('/', 'Superuser/UserController.store').as('store')
+    Route.get('/:id', 'Superuser/UserController.show').as('show')
+    Route.put('/:id', 'Superuser/UserController.update').as('update')
+    Route.put('/:id/password', 'Superuser/UserController.updatePassword').as('update.password')
+    Route.delete('/:id', 'Superuser/UserController.destroy').as('destroy')
+  })
+    .prefix('/user')
+    .as('user')
 })
   .prefix('/superuser')
   .as('superuser')
