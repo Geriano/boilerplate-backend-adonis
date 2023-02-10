@@ -1,5 +1,12 @@
 import { DateTime } from 'luxon'
-import { BaseModel, ManyToMany, column, manyToMany } from '@ioc:Adonis/Lucid/Orm'
+import {
+  BaseModel,
+  ManyToMany,
+  ModelQueryBuilderContract,
+  beforeFetch,
+  column,
+  manyToMany,
+} from '@ioc:Adonis/Lucid/Orm'
 import { createHash } from 'crypto'
 import Env from '@ioc:Adonis/Core/Env'
 import Permission from './Permission'
@@ -34,4 +41,9 @@ export default class Role extends BaseModel {
 
   @manyToMany(() => Permission)
   public permissions: ManyToMany<typeof Permission>
+
+  @beforeFetch()
+  public static async preloadPermissions(query: ModelQueryBuilderContract<typeof Role>) {
+    query.preload('permissions')
+  }
 }
