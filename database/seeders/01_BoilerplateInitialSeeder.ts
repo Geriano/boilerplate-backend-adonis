@@ -17,6 +17,8 @@ export default class extends BaseSeeder {
       name: 'superuser',
     })
 
+    su.related('roles').attach([superuser.$attributes.id])
+
     for (const permission of this.permissions) {
       for (const ability of ['create', 'read', 'update', 'delete']) {
         await Permission.create({
