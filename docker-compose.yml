@@ -26,4 +26,12 @@ services:
     ports:
       - 3333:3333
     volumes:
-      - .:/app
+      - ./app:/app/app
+      - ./commands:/app/commands
+      - ./config:/app/config
+      - ./contracts:/app/contracts
+      - ./database:/app/database
+      - ./providers:/app/providers
+      - ./start:/app/start
+      - ./tests:/app/tests
+      - ./tmp:/app/tmp
