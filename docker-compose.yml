@@ -32,6 +32,13 @@ services:
       - ./contracts:/app/contracts
       - ./database:/app/database
       - ./providers:/app/providers
+      - ./resources:/app/resources
       - ./start:/app/start
       - ./tests:/app/tests
       - ./tmp:/app/tmp
+      - ./.adonisrc.json:/app/.adonisrc.json
+      - ./ace-manifest.json:/app/ace-manifest.json
+      - ./env.ts:/app/env.ts
+      - ./package.json:/app/package.json
+      - ./server.ts:/app/server.ts
+      - ./test.ts:/app/test.ts
