@@ -107,7 +107,7 @@ export default class UserController {
     })
   }
 
-  public async store({ request, response }: HttpContextContract) {
+  public async store({ request, response, i18n }: HttpContextContract) {
     const { name, email, username, password, roles, permissions } = await this.validate(request)
 
     const transaction = await Database.beginGlobalTransaction()
@@ -141,7 +141,9 @@ export default class UserController {
       await user.load('roles')
 
       return response.created({
-        message: `user ${user.name} has been created`,
+        message: i18n.formatMessage('messages.user.created', {
+          title: user.name,
+        }),
         user,
       })
     } catch (e) {
@@ -153,25 +155,22 @@ export default class UserController {
     }
   }
 
-  public async show({ request, response }: HttpContextContract) {
-    const { id } = request.params()
-
+  public async show({ response, params }: HttpContextContract) {
     return response.ok(
       await User.query()
-        .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${User.table}.id)) = ?`, [id])
+        .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${User.table}.id)) = ?`, [params.id])
         .firstOrFail()
     )
   }
 
-  public async update({ request, response }: HttpContextContract) {
+  public async update({ request, response, params, i18n }: HttpContextContract) {
     const { name, email, username, roles, permissions } = await this.validate(request, {
       email: request.input('email'),
       username: request.input('username'),
     })
-    const { id } = request.params()
 
     const user = await User.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${User.table}.id)) = ?`, [id])
+      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${User.table}.id)) = ?`, [params.id])
       .firstOrFail()
 
     const transaction = await Database.beginGlobalTransaction()
@@ -203,7 +202,9 @@ export default class UserController {
       await user.load('roles')
 
       return response.ok({
-        message: `user ${user.name} has been updated`,
+        message: i18n.formatMessage('messages.user.updated', {
+          title: user.name,
+        }),
         user,
       })
     } catch (e) {
@@ -215,7 +216,7 @@ export default class UserController {
     }
   }
 
-  public async updatePassword({ request, response }: HttpContextContract) {
+  public async updatePassword({ request, response, i18n }: HttpContextContract) {
     const { password } = await request.validate({
       schema: schema.create({
         password: schema.string({ trim: true }, [
@@ -241,7 +242,7 @@ export default class UserController {
       await transaction.commit()
 
       return response.ok({
-        message: `password has been updated`,
+        message: i18n.formatMessage('messages.user.password updated'),
       })
     } catch (e) {
       await transaction.rollback()
@@ -252,7 +253,7 @@ export default class UserController {
     }
   }
 
-  public async destroy({ request, response }: HttpContextContract) {
+  public async destroy({ request, response, i18n }: HttpContextContract) {
     const { id } = request.params()
     const user = await User.query()
       .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${User.table}.id)) = ?`, [id])
@@ -265,7 +266,9 @@ export default class UserController {
       await transaction.commit()
 
       return response.ok({
-        message: `user ${user.name} has been deleted`,
+        message: i18n.formatMessage('messages.user.deleted', {
+          title: user.name,
+        }),
         user,
       })
     } catch (e) {

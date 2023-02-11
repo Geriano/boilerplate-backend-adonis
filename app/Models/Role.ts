@@ -11,6 +11,7 @@ import {
 import { createHash } from 'crypto'
 import Env from '@ioc:Adonis/Core/Env'
 import Permission from './Permission'
+import { HttpContext } from '@adonisjs/core/build/standalone'
 
 export default class Role extends BaseModel {
   @column({
@@ -38,7 +39,10 @@ export default class Role extends BaseModel {
 
   @computed()
   public get title() {
-    return this.name || this.key
+    const { i18n } = HttpContext.get()!
+    const title = this.name || this.key
+
+    return i18n.formatMessage(`messages.role.value.${title}`)
   }
 
   @column.dateTime({

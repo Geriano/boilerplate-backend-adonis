@@ -23,7 +23,8 @@
     "@adonisjs/lucid",
     "@adonisjs/auth",
     "@adonisjs/route-model-binding/build/providers/RmbProvider",
-    "adonis-lucid-soft-deletes"
+    "adonis-lucid-soft-deletes",
+    "@adonisjs/i18n"
   ],
   "aceProviders": [
     "@adonisjs/repl"
@@ -41,5 +42,8 @@
   },
   "testProviders": [
     "@japa/preset-adonis/TestsProvider"
+  ],
+  "metaFiles": [
+    "resources/lang/**/*.(json|yaml)"
   ]
 }

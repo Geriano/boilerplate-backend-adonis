@@ -15,7 +15,7 @@ export default class PermissionController {
     }
   }
 
-  public async store({ request, response }: HttpContextContract) {
+  public async store({ request, response, i18n }: HttpContextContract) {
     const { name, key } = await request.validate({
       schema: schema.create({
         name: schema.string.nullableAndOptional({ trim: true }),
@@ -36,7 +36,9 @@ export default class PermissionController {
       await transaction.commit()
 
       return response.created({
-        message: `permission ${permission.title} has been created`,
+        message: i18n.formatMessage('messages.permission.created', {
+          title: permission.title,
+        }),
         permission,
       })
     } catch (e) {
@@ -48,7 +50,7 @@ export default class PermissionController {
     }
   }
 
-  public async update({ request, response, params }: HttpContextContract) {
+  public async update({ request, response, params, i18n }: HttpContextContract) {
     const permission = await Permission.query()
       .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Permission.table}.id)) = ?`, [params.id])
       .firstOrFail()
@@ -76,7 +78,9 @@ export default class PermissionController {
       await permission.save()
 
       return response.ok({
-        message: `permission ${permission.title} has been updated`,
+        message: i18n.formatMessage('messages.permission.updated', {
+          title: permission.title,
+        }),
         permission,
       })
     } catch (e) {
@@ -88,7 +92,7 @@ export default class PermissionController {
     }
   }
 
-  public async destroy({ response, params }: HttpContextContract) {
+  public async destroy({ response, params, i18n }: HttpContextContract) {
     const id = params.id as string
     const permission = await Permission.query()
       .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Permission.table}.id)) = ?`, [id])
@@ -100,7 +104,9 @@ export default class PermissionController {
       await permission.delete()
 
       return response.ok({
-        message: `permission ${permission.title} has been deleted`,
+        message: i18n.formatMessage('messages.permission.deleted', {
+          title: permission.title,
+        }),
         permission,
       })
     } catch (e) {

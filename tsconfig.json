@@ -32,7 +32,8 @@
       "@adonisjs/lucid",
       "@adonisjs/auth",
       "@adonisjs/route-model-binding/build/adonis-typings",
-      "adonis-lucid-soft-deletes"
+      "adonis-lucid-soft-deletes",
+      "@adonisjs/i18n"
     ]
   }
 }

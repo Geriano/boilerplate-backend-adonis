@@ -1,0 +1,38 @@
+{
+  "permission": {
+    "created": "permission \"{ title }\" has been created",
+    "updated": "permission \"{ title }\" has been updated",
+    "deleted": "permission \"{ title }\" has been deleted",
+    "value": {
+      "read permission": "read permission",
+      "create permission": "create permission",
+      "update permission": "update permission",
+      "delete permission": "delete permission",
+      "read role": "read role",
+      "create role": "create role",
+      "update role": "update role",
+      "delete role": "delete role",
+      "read user": "read user",
+      "create user": "create user",
+      "update user": "update user",
+      "delete user": "delete user",
+      "configure permission key": "configure permission key",
+      "configure role key": "configure role key"
+    }
+  },
+  "role": {
+    "created": "role \"{ title }\" has been created",
+    "updated": "role \"{ title }\" has been updated",
+    "deleted": "role \"{ title }\" has been deleted",
+    "value": {
+      "superuser": "superuser",
+      "developer": "developer"
+    }
+  },
+  "user": {
+    "created": "user \"{ title }\" has been created",
+    "updated": "user \"{ title }\" has been updated",
+    "deleted": "user \"{ title }\" has been deleted",
+    "password updated": "password has been updated"
+  }
+}

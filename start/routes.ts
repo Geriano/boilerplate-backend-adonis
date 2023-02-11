@@ -20,8 +20,10 @@
 
 import Route from '@ioc:Adonis/Core/Route'
 
-Route.get('/', async () => {
-  return { hello: 'world' }
+Route.get('/', async ({ i18n }) => {
+  return {
+    locale: i18n.locale,
+  }
 })
 
 Route.group(() => {
@@ -37,10 +39,10 @@ Route.group(() => {
   Route.group(() => {
     Route.get('/', 'Superuser/RoleController.paginate').as('paginate')
     Route.post('/', 'Superuser/RoleController.store').as('store')
+    Route.get('/all', 'Superuser/RoleController.all').as('all')
     Route.get('/:id', 'Superuser/RoleController.show').as('show')
     Route.put('/:id', 'Superuser/RoleController.update').as('update')
     Route.delete('/:id', 'Superuser/RoleController.destroy').as('destroy')
-    Route.get('/all', 'Superuser/RoleController.all').as('all')
   })
     .prefix('/role')
     .as('role')

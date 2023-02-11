@@ -9,6 +9,7 @@ import {
 } from '@ioc:Adonis/Lucid/Orm'
 import { createHash } from 'crypto'
 import Env from '@ioc:Adonis/Core/Env'
+import HttpContext from '@ioc:Adonis/Core/HttpContext'
 import Role from './Role'
 
 export default class Permission extends BaseModel {
@@ -37,7 +38,10 @@ export default class Permission extends BaseModel {
 
   @computed()
   public get title() {
-    return this.name || this.key
+    const { i18n } = HttpContext.get()!
+    const title = this.name || this.key
+
+    return i18n.formatMessage(`messages.permission.value.${title}`)
   }
 
   @column.dateTime({

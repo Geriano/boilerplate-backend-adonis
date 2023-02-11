@@ -8,13 +8,16 @@ import Permission from 'App/Models/Permission'
 export default class RoleController {
   public async all({ response }: HttpContextContract) {
     try {
-      const roles = await Role.query().select(['id', 'name', 'key']).exec()
+      const roles = await Role.all()
+
       return response.ok(
         roles.map((role) => {
+          const data = role.serialize()
+
           return {
-            id: role.id,
-            title: role.title,
-            key: role.key,
+            id: data.id,
+            title: data.title,
+            key: data.key,
           }
         })
       )
@@ -56,7 +59,7 @@ export default class RoleController {
     }
   }
 
-  public async store({ request, response }: HttpContextContract) {
+  public async store({ request, response, i18n }: HttpContextContract) {
     const { name, key, permissions } = await request.validate({
       schema: schema.create({
         name: schema.string.nullableAndOptional({ trim: true }),
@@ -91,7 +94,9 @@ export default class RoleController {
       await transaction.commit()
 
       return response.created({
-        message: `role ${role.title} has been created`,
+        message: i18n.formatMessage('messages.role.created', {
+          title: role.title,
+        }),
         role,
       })
     } catch (e) {
@@ -111,7 +116,7 @@ export default class RoleController {
     return response.ok(role)
   }
 
-  public async update({ request, response, params }: HttpContextContract) {
+  public async update({ request, response, params, i18n }: HttpContextContract) {
     const role = await Role.query()
       .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [params.id])
       .firstOrFail()
@@ -152,7 +157,9 @@ export default class RoleController {
       }
 
       return response.ok({
-        message: `role ${role.title} has been updated`,
+        message: i18n.formatMessage('messages.role.updated', {
+          title: role.title,
+        }),
         role,
       })
     } catch (e) {
@@ -164,7 +171,7 @@ export default class RoleController {
     }
   }
 
-  public async destroy({ response, params }: HttpContextContract) {
+  public async destroy({ response, params, i18n }: HttpContextContract) {
     const role = await Role.query()
       .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [params.id])
       .firstOrFail()
@@ -175,7 +182,9 @@ export default class RoleController {
       await role.delete()
 
       return response.ok({
-        message: `role ${role.title} has been deleted`,
+        message: i18n.formatMessage('messages.role.deleted', {
+          title: role.title,
+        }),
         role,
       })
     } catch (e) {

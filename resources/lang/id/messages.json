@@ -1,0 +1,37 @@
+{
+  "permission": {
+    "created": "izin \"{ title }\" telah dibuat",
+    "updated": "izin \"{ title }\" telah diperbaharui",
+    "deleted": "izin \"{ title }\" telah dihapus",
+    "value": {
+      "read permission": "megakses perizinan",
+      "create permission": "membuat perizinan",
+      "update permission": "memperbaharui perizinan",
+      "delete permission": "menghapus perizinan",
+      "read role": "megakses peran",
+      "create role": "membuat peran",
+      "update role": "memperbaharui peran",
+      "delete role": "menghapus peran",
+      "read user": "megakses pengguna",
+      "create user": "membuat pengguna",
+      "update user": "memperbaharui pengguna",
+      "delete user": "menghapus pengguna",
+      "configure permission key": "configure permission key",
+      "configure role key": "configure peran key"
+    }
+  },
+  "role": {
+    "created": "peran \"{ title }\" telah dibuat",
+    "updated": "peran \"{ title }\" telah diperbaharui",
+    "deleted": "peran \"{ title }\" telah dihapus",
+    "value": {
+      "superuser": "pengguna super",
+      "developer": "pengembang"
+    }
+  },
+  "user": {
+    "created": "user \"{ title }\" telah dibuat",
+    "updated": "user \"{ title }\" telah diperbaharui",
+    "deleted": "user \"{ title }\" telah dihapus"
+  }
+}
