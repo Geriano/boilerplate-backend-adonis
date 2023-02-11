@@ -45,8 +45,6 @@ export default class AuthController {
   public async can({ auth, request, response }: HttpContextContract) {
     const abilities = request.input('abilities')
 
-    console.log(abilities)
-
     if (Array.isArray(abilities)) {
       return response.status(auth.user!.can(abilities) ? 200 : 401)
     }
