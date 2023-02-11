@@ -62,6 +62,14 @@ Route.group(() => {
   .as('superuser')
   .middleware(['auth'])
 
-Route.any('/user', 'AuthController.user').as('user').middleware(['auth'])
+Route.group(() => {
+  Route.any('/', 'AuthController.user').as('current')
+  Route.post('/has-permission', 'AuthController.hasPermission').as('has-permission')
+  Route.post('/has-role', 'AuthController.hasRole').as('has-role')
+  Route.post('/can', 'AuthController.can').as('can')
+})
+  .middleware(['auth'])
+  .prefix('/user')
+  .as('user')
 Route.post('/login', 'LoginController.process').as('login')
 Route.delete('/logout', 'LogoutController.process').as('logout').middleware(['auth'])

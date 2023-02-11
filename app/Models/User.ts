@@ -69,4 +69,46 @@ export default class User extends compose(BaseModel, SoftDeletes) {
     query.preload('permissions', (query) => query.select(['id', 'name', 'key']))
     query.preload('roles', (query) => query.select(['id', 'name', 'key']))
   }
+
+  public hasRole(roles: string | string[]) {
+    if (Array.isArray(roles)) {
+      for (const role of roles) {
+        if (this.hasRole(role)) {
+          return true
+        }
+      }
+
+      return false
+    }
+
+    return this.roles.find((role) => role.key === roles) !== undefined
+  }
+
+  public hasPermission(permissions: string | string[]) {
+    if (Array.isArray(permissions)) {
+      for (const role of permissions) {
+        if (this.hasPermission(role)) {
+          return true
+        }
+      }
+
+      return false
+    }
+
+    if (this.permissions.find((role) => role.key === permissions) !== undefined) {
+      return true
+    }
+
+    for (const role of this.roles) {
+      if (role.hasPermission(permissions)) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  public can(permissionsOrRoles: string | string[]) {
+    return this.hasPermission(permissionsOrRoles) || this.hasRole(permissionsOrRoles)
+  }
 }

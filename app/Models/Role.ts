@@ -65,4 +65,18 @@ export default class Role extends BaseModel {
   public static async preloadPermissions(query: ModelQueryBuilderContract<typeof Role>) {
     query.preload('permissions')
   }
+
+  public hasPermission(permissions: string | string[]) {
+    if (Array.isArray(permissions)) {
+      for (const permission of permissions) {
+        if (this.hasPermission(permission)) {
+          return true
+        }
+      }
+
+      return false
+    }
+
+    return this.permissions.find((permission) => permission.key === permissions) !== undefined
+  }
 }
