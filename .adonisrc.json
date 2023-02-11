@@ -4,7 +4,8 @@
     "./commands",
     "@adonisjs/core/build/commands/index.js",
     "@adonisjs/repl/build/commands",
-    "@adonisjs/lucid/build/commands"
+    "@adonisjs/lucid/build/commands",
+    "@adonisjs/mail/build/commands"
   ],
   "exceptionHandlerNamespace": "App/Exceptions/Handler",
   "aliases": {
@@ -25,7 +26,9 @@
     "@adonisjs/auth",
     "@adonisjs/route-model-binding/build/providers/RmbProvider",
     "adonis-lucid-soft-deletes",
-    "@adonisjs/i18n"
+    "@adonisjs/i18n",
+    "@adonisjs/mail",
+    "@adonisjs/view"
   ],
   "aceProviders": [
     "@adonisjs/repl"
@@ -45,6 +48,10 @@
     "@japa/preset-adonis/TestsProvider"
   ],
   "metaFiles": [
-    "resources/lang/**/*.(json|yaml)"
+    "resources/lang/**/*.(json|yaml)",
+    {
+      "pattern": "resources/views/**/*.edge",
+      "reloadServer": false
+    }
   ]
 }
