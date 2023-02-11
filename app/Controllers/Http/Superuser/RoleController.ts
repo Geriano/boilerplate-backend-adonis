@@ -3,6 +3,7 @@ import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Role from 'App/Models/Role'
 import Env from '@ioc:Adonis/Core/Env'
+import Permission from 'App/Models/Permission'
 
 export default class RoleController {
   public async all({ response }: HttpContextContract) {
@@ -56,7 +57,7 @@ export default class RoleController {
   }
 
   public async store({ request, response }: HttpContextContract) {
-    const { name, key } = await request.validate({
+    const { name, key, permissions } = await request.validate({
       schema: schema.create({
         name: schema.string.nullableAndOptional({ trim: true }),
         key: schema.string({ trim: true }, [
@@ -65,6 +66,9 @@ export default class RoleController {
             column: 'key',
           }),
         ]),
+        permissions: schema.array
+          .nullableAndOptional()
+          .members(schema.number([rules.exists({ table: Permission.table, column: 'id' })])),
       }),
     })
 
@@ -73,6 +77,17 @@ export default class RoleController {
     try {
       const role = await Role.create({ name, key })
 
+      if (permissions) {
+        await role.related('permissions').attach(
+          await Permission.query()
+            .whereIn('key', permissions)
+            .select(['id'])
+            .exec()
+            .then((permissions) => permissions.map((permission) => permission.id))
+        )
+      }
+
+      await role.load('permissions')
       await transaction.commit()
 
       return response.created({
@@ -93,7 +108,7 @@ export default class RoleController {
       .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [params.id])
       .firstOrFail()
 
-    const { name, key } = await request.validate({
+    const { name, key, permissions } = await request.validate({
       schema: schema.create({
         name: schema.string.nullableAndOptional({ trim: true }),
         key: schema.string({ trim: true }, [
@@ -105,6 +120,9 @@ export default class RoleController {
             },
           }),
         ]),
+        permissions: schema.array
+          .nullableAndOptional()
+          .members(schema.number([rules.exists({ table: Permission.table, column: 'id' })])),
       }),
     })
 
@@ -114,6 +132,16 @@ export default class RoleController {
       role.key = key
       name !== undefined && (role.name = name)
       await role.save()
+
+      if (Array.isArray(permissions)) {
+        await role.related('permissions').sync(
+          await Permission.query()
+            .whereIn('key', permissions)
+            .select(['id'])
+            .exec()
+            .then((permissions) => permissions.map((permission) => permission.id))
+        )
+      }
 
       return response.ok({
         message: `role ${role.title} has been updated`,
