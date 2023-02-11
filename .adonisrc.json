@@ -15,6 +15,7 @@
   },
   "preloads": [
     "./start/routes",
+    "./start/boilerplate",
     "./start/kernel"
   ],
   "providers": [
