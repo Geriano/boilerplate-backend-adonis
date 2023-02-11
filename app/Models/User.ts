@@ -66,7 +66,7 @@ export default class User extends compose(BaseModel, SoftDeletes) {
 
   @beforeFind()
   public static async preloadPermissionsAndRoles(query: ModelQueryBuilderContract<typeof User>) {
-    query.preload('permissions', (query) => query.select(['id', 'name']))
-    query.preload('roles', (query) => query.select(['id', 'name']))
+    query.preload('permissions', (query) => query.select(['id', 'name', 'key']))
+    query.preload('roles', (query) => query.select(['id', 'name', 'key']))
   }
 }

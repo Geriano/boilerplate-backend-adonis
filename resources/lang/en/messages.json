@@ -34,5 +34,12 @@
     "updated": "user \"{ title }\" has been updated",
     "deleted": "user \"{ title }\" has been deleted",
     "password updated": "password has been updated"
+  },
+  "auth": {
+    "login": {
+      "authenticated": "authenticated",
+      "wrong password": "wrong password"
+    },
+    "logouted": "logout successfully"
   }
 }

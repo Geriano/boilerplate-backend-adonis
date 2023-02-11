@@ -60,3 +60,8 @@ Route.group(() => {
 })
   .prefix('/superuser')
   .as('superuser')
+  .middleware(['auth'])
+
+Route.any('/user', 'AuthController.user').as('user').middleware(['auth'])
+Route.post('/login', 'LoginController.process').as('login')
+Route.delete('/logout', 'LogoutController.process').as('logout').middleware(['auth'])

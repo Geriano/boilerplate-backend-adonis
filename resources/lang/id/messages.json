@@ -33,5 +33,12 @@
     "created": "user \"{ title }\" telah dibuat",
     "updated": "user \"{ title }\" telah diperbaharui",
     "deleted": "user \"{ title }\" telah dihapus"
+  },
+  "auth": {
+    "login": {
+      "authenticated": "diauthentikasi",
+      "wrong password": "kata sandi salah"
+    },
+    "logouted": "berhasil keluar"
   }
 }
