@@ -1,3 +1,5 @@
+import { compose } from '@ioc:Adonis/Core/Helpers'
+import { SoftDeletes } from '@ioc:Adonis/Addons/LucidSoftDeletes'
 import { DateTime } from 'luxon'
 import Hash from '@ioc:Adonis/Core/Hash'
 import {
@@ -14,7 +16,7 @@ import Env from '@ioc:Adonis/Core/Env'
 import Permission from './Permission'
 import Role from './Role'
 
-export default class User extends BaseModel {
+export default class User extends compose(BaseModel, SoftDeletes) {
   @column({
     isPrimary: true,
     serialize(value) {
