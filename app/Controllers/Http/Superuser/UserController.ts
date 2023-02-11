@@ -91,7 +91,7 @@ export default class UserController {
           schema.number([
             rules.exists({
               table: Permission.table,
-              column: 'id',
+              column: 'key',
             }),
           ])
         ),
@@ -99,7 +99,7 @@ export default class UserController {
           schema.number([
             rules.exists({
               table: Role.table,
-              column: 'id',
+              column: 'key',
             }),
           ])
         ),
@@ -120,11 +120,23 @@ export default class UserController {
         password,
       })
 
-      permissions && (await user.related('permissions').sync(permissions))
-      roles && (await user.related('roles').sync(roles))
+      if (Array.isArray(permissions)) {
+        await user.related('permissions').attach(
+          await Permission.query()
+            .whereIn('key', permissions)
+            .then((permissions) => permissions.map((permission) => permission.id))
+        )
+      }
+
+      if (Array.isArray(roles)) {
+        await user.related('roles').attach(
+          await Permission.query()
+            .whereIn('key', roles)
+            .then((roles) => roles.map((role) => role.id))
+        )
+      }
 
       await transaction.commit()
-
       await user.load('permissions')
       await user.load('roles')
 
@@ -170,11 +182,23 @@ export default class UserController {
       user.username = username
       await user.save()
 
-      permissions && (await user.related('permissions').sync(permissions))
-      roles && (await user.related('roles').sync(roles))
+      if (Array.isArray(permissions)) {
+        await user.related('permissions').sync(
+          await Permission.query()
+            .whereIn('key', permissions)
+            .then((permissions) => permissions.map((permission) => permission.id))
+        )
+      }
+
+      if (Array.isArray(roles)) {
+        await user.related('roles').sync(
+          await Permission.query()
+            .whereIn('key', roles)
+            .then((roles) => roles.map((role) => role.id))
+        )
+      }
 
       await transaction.commit()
-
       await user.load('permissions')
       await user.load('roles')
 
