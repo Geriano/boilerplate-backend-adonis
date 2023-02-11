@@ -40,6 +40,7 @@
       "authenticated": "authenticated",
       "wrong password": "wrong password"
     },
-    "logouted": "logout successfully"
+    "logouted": "logout successfully",
+    "verification": "verification email has been sent to { email }, please check your inbox"
   }
 }

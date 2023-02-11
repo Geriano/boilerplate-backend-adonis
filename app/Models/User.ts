@@ -45,6 +45,9 @@ export default class User extends compose(BaseModel, SoftDeletes) {
   })
   public rememberMeToken: string | null
 
+  @column.dateTime()
+  public emailVerifiedAt: DateTime | null
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

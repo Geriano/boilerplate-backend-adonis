@@ -39,6 +39,7 @@
       "authenticated": "diauthentikasi",
       "wrong password": "kata sandi salah"
     },
-    "logouted": "berhasil keluar"
+    "logouted": "berhasil keluar",
+    "verification": "verifikasi email telah dikirimkan kepada { email }, silahan cek inbox"
   }
 }

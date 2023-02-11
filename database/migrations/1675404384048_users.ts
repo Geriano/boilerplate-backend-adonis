@@ -18,6 +18,9 @@ export default class extends BaseSchema {
         .notNullable()
       table.string('remember_me_token')
         .nullable()
+      table.timestamp('email_verified_at', { useTz: true })
+        .nullable()
+        .defaultTo(null)
 
       /**
        * Uses timestampz for PostgreSQL and DATETIME2 for MSSQL
