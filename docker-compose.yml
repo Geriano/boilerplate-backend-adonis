@@ -37,6 +37,7 @@ services:
       - ./tests:/app/tests
       - ./tmp:/app/tmp
       - ./.adonisrc.json:/app/.adonisrc.json
+      - ./.env:/app/.env
       - ./ace-manifest.json:/app/ace-manifest.json
       - ./env.ts:/app/env.ts
       - ./package.json:/app/package.json
