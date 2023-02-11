@@ -37,6 +37,7 @@ Route.group(() => {
   Route.group(() => {
     Route.get('/', 'Superuser/RoleController.paginate').as('paginate')
     Route.post('/', 'Superuser/RoleController.store').as('store')
+    Route.get('/:id', 'Superuser/RoleController.show').as('show')
     Route.put('/:id', 'Superuser/RoleController.update').as('update')
     Route.delete('/:id', 'Superuser/RoleController.destroy').as('destroy')
     Route.get('/all', 'Superuser/RoleController.all').as('all')

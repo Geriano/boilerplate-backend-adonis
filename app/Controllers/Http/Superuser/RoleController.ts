@@ -103,6 +103,14 @@ export default class RoleController {
     }
   }
 
+  public async show({ response, params }: HttpContextContract) {
+    const role = await Role.query()
+      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [params.id])
+      .firstOrFail()
+
+    return response.ok(role)
+  }
+
   public async update({ request, response, params }: HttpContextContract) {
     const role = await Role.query()
       .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [params.id])
