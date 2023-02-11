@@ -69,9 +69,6 @@ export default class UserController {
               username: update.username,
             },
       }),
-      rules.normalizeEmail({
-        allLowercase: true,
-      }),
       rules.minLength(2),
       rules.maxLength(64),
     ]
