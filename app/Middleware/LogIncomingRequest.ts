@@ -1,14 +1,23 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import IncomingRequest from 'App/Models/IncomingRequest'
 
 export default class LogIncomingRequest {
-  public async handle({ request }: HttpContextContract, next: () => Promise<void>) {
-    // code for middleware goes here. ABOVE THE NEXT CALL
+  public async handle({ request, route }: HttpContextContract, next: () => Promise<void>) {
+    const name = route?.name
     const method = request.method()
     const path = request.url(true)
     const start = new Date().getTime()
     const ip = request.ip()
 
     await next()
+
+    await IncomingRequest.create({
+      name,
+      method,
+      path: request.url(),
+      ip,
+      time: new Date().getTime() - start,
+    })
 
     const end = new Date().getTime()
     let diff = end - start

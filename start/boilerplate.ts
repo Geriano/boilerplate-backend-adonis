@@ -67,6 +67,12 @@ Route.group(() => {
   .middleware(['auth'])
 
 Route.group(() => {
+  Route.get('/average', 'IncomingRequestController.average').as('average')
+})
+  .prefix('/incoming-request')
+  .as('incoming-request')
+
+Route.group(() => {
   Route.any('/', 'AuthController.user').as('current')
   Route.post('/has-permission', 'AuthController.hasPermission').as('has-permission')
   Route.post('/has-role', 'AuthController.hasRole').as('has-role')
