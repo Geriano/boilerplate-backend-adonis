@@ -73,7 +73,7 @@ export default class UserController {
       rules.maxLength(64),
     ]
     const password = [rules.minLength(8), rules.maxLength(255), rules.alphaNum()]
-    const passwordConfirmation = [rules.equalTo('password')]
+    const passwordConfirmation = [rules.confirmed('password')]
 
     return await request.validate({
       schema: schema.create({
@@ -221,7 +221,7 @@ export default class UserController {
           rules.maxLength(255),
           rules.alphaNum(),
         ]),
-        password_confirmation: schema.string({ trim: true }, [rules.equalTo('password')]),
+        password_confirmation: schema.string({ trim: true }, [rules.confirmed('password')]),
       }),
     })
 

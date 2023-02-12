@@ -40,7 +40,7 @@ export default class RegisterController {
           rules.maxLength(255),
           rules.minLength(8),
           rules.alphaNum(),
-          rules.equalTo('password'),
+          rules.confirmed('password'),
         ]),
       }),
     })
