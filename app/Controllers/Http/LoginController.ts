@@ -30,7 +30,7 @@ export default class LoginController {
         expiresIn: '3 day',
       })
 
-      await Event.emit('login', user)
+      await Event.emit('user:login', user)
 
       return response.ok({
         message: i18n.formatMessage('messages.auth.login.authenticated'),
