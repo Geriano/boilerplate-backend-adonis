@@ -2,6 +2,7 @@ import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
 import Permission from 'App/Models/Permission'
 import Role from 'App/Models/Role'
 import User from 'App/Models/User'
+import { DateTime } from 'luxon'
 
 export default class extends BaseSeeder {
   private permissions = ['permission', 'role', 'user']
@@ -11,6 +12,7 @@ export default class extends BaseSeeder {
       email: 'superuser@local.app',
       username: 'su',
       password: 'password',
+      emailVerifiedAt: DateTime.now(),
     })
 
     const dev = await User.create({
@@ -18,6 +20,7 @@ export default class extends BaseSeeder {
       email: 'dev@local.app',
       username: 'dev',
       password: 'password',
+      emailVerifiedAt: DateTime.now(),
     })
 
     const superuser = await Role.create({

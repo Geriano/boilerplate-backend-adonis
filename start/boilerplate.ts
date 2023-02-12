@@ -84,3 +84,4 @@ Route.group(() => {
 Route.post('/login', 'LoginController.process').as('login')
 Route.delete('/logout', 'LogoutController.process').as('logout').middleware(['auth'])
 Route.post('/register', 'RegisterController.process').as('register')
+Route.get('/verify', 'RegisterController.verify').as('verify')

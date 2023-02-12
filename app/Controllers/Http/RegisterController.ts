@@ -3,6 +3,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Encryption from '@ioc:Adonis/Core/Encryption'
+import Event from '@ioc:Adonis/Core/Event'
 import User from 'App/Models/User'
 import { DateTime } from 'luxon'
 
@@ -54,22 +55,7 @@ export default class RegisterController {
         password,
       })
 
-      const token = Encryption.encrypt({
-        id: user.id,
-        expired_at: DateTime.now().plus({ day: 1 }).toISO(),
-      })
-
-      await Mail.sendLater((message) => {
-        message
-          .from('info@boilerplate.js')
-          .to(user.email)
-          .subject('Email verification')
-          .htmlView('emails/verify', {
-            user,
-            url: `http://localhost:3333/verify?token=${token}`,
-          })
-      })
-
+      await this.send(user)
       await transaction.commit()
 
       return response.created({
@@ -77,6 +63,73 @@ export default class RegisterController {
           email: user.email,
         }),
         user,
+      })
+    } catch (e) {
+      await transaction.rollback()
+
+      return response.internalServerError({
+        message: `${e}`,
+      })
+    }
+  }
+
+  private async send(user: User) {
+    const token = Encryption.encrypt({
+      id: user.id,
+      expired_at: DateTime.now().plus({ day: 1 }).toISO(),
+    })
+
+    await Mail.sendLater((message) => {
+      message
+        .from('info@boilerplate.js')
+        .to(user.email)
+        .subject('Email verification')
+        .htmlView('emails/verify', {
+          user,
+          url: `http://localhost:3333/verify?token=${token}`,
+        })
+    })
+  }
+
+  public async verify({ request, response, i18n }: HttpContextContract) {
+    const { token } = request.qs() as {
+      token: string
+    }
+
+    if (!token) {
+      return response.badRequest()
+    }
+
+    const transaction = await Database.beginGlobalTransaction()
+
+    try {
+      const { id, expired_at: expiredAt } = Encryption.decrypt(token) as {
+        id: number
+        expired_at: string
+      }
+
+      const user = await User.findOrFail(id)
+
+      const expired = new Date(expiredAt).getTime()
+
+      if (new Date().getTime() >= expired) {
+        const body = {
+          message: i18n.formatMessage('messages.response.419.message'),
+          description: i18n.formatMessage('messages.response.419.description'),
+        }
+
+        await this.send(user)
+
+        return response.abort(body, 419)
+      }
+
+      user.emailVerifiedAt = DateTime.now()
+      await user.save()
+      await transaction.commit()
+      await Event.emit('user:registered', user)
+
+      return response.ok({
+        message: i18n.formatMessage('messages.auth.verified'),
       })
     } catch (e) {
       await transaction.rollback()
