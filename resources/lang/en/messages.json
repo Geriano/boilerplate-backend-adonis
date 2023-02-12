@@ -42,7 +42,8 @@
     },
     "logouted": "logout successfully",
     "verification": "verification email has been sent to { email }, please check your inbox",
-    "verified": "your email has been verified, now you can login"
+    "verified": "your email has been verified, now you can login",
+    "reseted": "your account password has been reseted, now you can login with new password"
   },
   "response": {
     "100": {

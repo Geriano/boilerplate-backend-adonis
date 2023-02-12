@@ -41,7 +41,8 @@
     },
     "logouted": "berhasil keluar",
     "verification": "verifikasi email telah dikirimkan kepada { email }, silahan cek inbox",
-    "verified": "email anda telah terverifikasi, sekarang anda dapat login"
+    "verified": "email anda telah terverifikasi, sekarang anda dapat login",
+    "reseted": "your account password has been reseted, now you can login with new password"
   },
   "response": {
     "100": {
