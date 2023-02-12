@@ -220,6 +220,11 @@
       "message": "I'm a teapot",
       "description": "Any attempt to brew coffee with a teapot should result in the error code 418 I'm a teapot."
     },
+    "419": {
+      "code": "419",
+      "message": "Page Expired",
+      "description": "indicates that the page is expired."
+    },
     "426": {
       "code": "426",
       "message": "Upgrade Required",

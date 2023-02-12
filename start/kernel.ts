@@ -25,6 +25,7 @@ Server.middleware.register([
   () => import('@ioc:Adonis/Addons/RmbMiddleware'),
   () => import('App/Middleware/DetectUserLocale'),
   () => import('App/Middleware/LogIncomingRequest'),
+  () => import('App/Middleware/ValidateCsrfToken'),
 ])
 
 /*
