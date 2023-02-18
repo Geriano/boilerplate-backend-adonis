@@ -5,7 +5,16 @@ import Role from 'App/Models/Role'
 
 export default class AuthController {
   public async user({ auth, response }: HttpContextContract) {
-    return response.ok(auth.user!)
+    const user = auth.user!
+
+    return response.ok({
+      ...user.serialize(),
+      permissions: user.permissions.map(({ key }) => ({ key })),
+      roles: user.roles.map(({ key, permissions }) => ({
+        key,
+        permissions: permissions.map(({ key }) => ({ key })),
+      })),
+    })
   }
 
   public async hasPermission({ auth, request, response }: HttpContextContract) {
