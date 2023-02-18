@@ -36,7 +36,7 @@ export default class RoleController {
         search: schema.string.optional(),
         order: schema.object().members({
           dir: schema.enum(['asc', 'desc']),
-          key: schema.enum(['name']),
+          key: schema.enum(['name', 'key']),
         }),
       }),
     })
