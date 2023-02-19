@@ -156,6 +156,8 @@ export default class RoleController {
         )
       }
 
+      await transaction.commit()
+
       return response.ok({
         message: i18n.formatMessage('messages.role.updated', {
           title: role.title,
@@ -180,9 +182,48 @@ export default class RoleController {
 
     try {
       await role.delete()
+      await transaction.commit()
 
       return response.ok({
         message: i18n.formatMessage('messages.role.deleted', {
+          title: role.title,
+        }),
+        role,
+      })
+    } catch (e) {
+      await transaction.rollback()
+
+      return response.internalServerError({
+        message: `${e}`,
+      })
+    }
+  }
+
+  public async togglePermission({ response, params, i18n }: HttpContextContract) {
+    const { roleId, permissionId } = params
+
+    const role = await Role.query()
+      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [roleId])
+      .preload('permissions')
+      .firstOrFail()
+
+    const permission = await Permission.query()
+      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Permission.table}.id)) = ?`, [permissionId])
+      .firstOrFail()
+
+    const transaction = await Database.beginGlobalTransaction()
+
+    try {
+      if (role.permissions.find((p) => p.key === permission.key)) {
+        await role.related('permissions').detach([permission.id])
+      } else {
+        await role.related('permissions').attach([permission.id])
+      }
+
+      await transaction.commit()
+
+      return response.ok({
+        message: i18n.formatMessage('messages.role.updated', {
           title: role.title,
         }),
         role,

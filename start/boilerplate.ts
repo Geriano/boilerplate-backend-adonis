@@ -35,6 +35,12 @@ Route.group(() => {
     Route.delete('/:id', 'Superuser/RoleController.destroy')
       .as('destroy')
       .middleware(['permission:delete role'])
+    Route.put(
+      '/:roleId/toggle-permission/:permissionId',
+      'Superuser/RoleController.togglePermission'
+    )
+      .as('toggle-permission')
+      .middleware(['permission:update role'])
   })
     .prefix('/role')
     .as('role')
