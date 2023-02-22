@@ -39,10 +39,7 @@ export default class UserController {
     }
   }
 
-  private async validate(
-    request: HttpContextContract['request'],
-    update: { email: string; username: string } | null = null
-  ) {
+  private async validate(request: HttpContextContract['request'], update: User | null = null) {
     const option = { trim: true }
     const email = [
       rules.unique({
@@ -85,7 +82,7 @@ export default class UserController {
           ? schema.string.optional(passwordConfirmation)
           : schema.string(option, passwordConfirmation),
         permissions: schema.array.optional().members(
-          schema.number([
+          schema.string([
             rules.exists({
               table: Permission.table,
               column: 'key',
@@ -93,7 +90,7 @@ export default class UserController {
           ])
         ),
         roles: schema.array.optional().members(
-          schema.number([
+          schema.string([
             rules.exists({
               table: Role.table,
               column: 'key',
@@ -161,14 +158,11 @@ export default class UserController {
   }
 
   public async update({ request, response, params, i18n }: HttpContextContract) {
-    const { name, email, username, roles, permissions } = await this.validate(request, {
-      email: request.input('email'),
-      username: request.input('username'),
-    })
-
     const user = await User.query()
       .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${User.table}.id)) = ?`, [params.id])
       .firstOrFail()
+
+    const { name, email, username, roles, permissions } = await this.validate(request, user)
 
     const transaction = await Database.beginGlobalTransaction()
 
