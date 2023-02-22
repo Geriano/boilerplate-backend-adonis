@@ -270,4 +270,78 @@ export default class UserController {
       })
     }
   }
+
+  public async togglePermission({ response, params, i18n }: HttpContextContract) {
+    const user = await User.query()
+      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${User.table}.id)) = ?`, [params.user])
+      .preload('permissions')
+      .firstOrFail()
+
+    const permission = await Permission.query()
+      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Permission.table}.id)) = ?`, [
+        params.permission,
+      ])
+      .firstOrFail()
+
+    const transaction = await Database.beginGlobalTransaction()
+
+    try {
+      if (user.permissions.find((p) => permission.id === p.id)) {
+        await user.related('permissions').detach([permission.id])
+      } else {
+        await user.related('permissions').attach([permission.id])
+      }
+
+      await transaction.commit()
+
+      return response.ok({
+        message: i18n.formatMessage('messages.user.updated', {
+          title: user.name,
+        }),
+        user,
+      })
+    } catch (e) {
+      await transaction.rollback()
+
+      return response.internalServerError({
+        message: `${e}`,
+      })
+    }
+  }
+
+  public async toggleRole({ response, params, i18n }: HttpContextContract) {
+    const user = await User.query()
+      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${User.table}.id)) = ?`, [params.user])
+      .preload('roles')
+      .firstOrFail()
+
+    const role = await Role.query()
+      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [params.role])
+      .firstOrFail()
+
+    const transaction = await Database.beginGlobalTransaction()
+
+    try {
+      if (user.roles.find((r) => role.id === r.id)) {
+        await user.related('roles').detach([role.id])
+      } else {
+        await user.related('roles').attach([role.id])
+      }
+
+      await transaction.commit()
+
+      return response.ok({
+        message: i18n.formatMessage('messages.user.updated', {
+          title: user.name,
+        }),
+        user,
+      })
+    } catch (e) {
+      await transaction.rollback()
+
+      return response.internalServerError({
+        message: `${e}`,
+      })
+    }
+  }
 }
