@@ -16,7 +16,7 @@ export default class CsrfTokenController {
 
     const csrf = await CsrfToken.create({
       ip: request.ip(),
-      expiredAt: DateTime.now().plus({ minute: 30 }),
+      expiredAt: DateTime.now().plus({ seconds: 30 }),
     })
 
     return response.created({
