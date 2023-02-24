@@ -79,6 +79,15 @@ Route.group(() => {
   .middleware(['auth'])
 
 Route.group(() => {
+  Route.get('/', 'TranslationController.index').as('index')
+  Route.get('/:id', 'TranslationController.list').as('list')
+  Route.get('/:id/:name', 'TranslationController.show').as('show')
+  Route.put('/:id/:name', 'TranslationController.update').as('update')
+})
+  .prefix('/translation')
+  .as('translation')
+
+Route.group(() => {
   Route.get('/average', 'IncomingRequestController.average').as('average')
 })
   .prefix('/incoming-request')
