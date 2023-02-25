@@ -3,6 +3,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Encryption from '@ioc:Adonis/Core/Encryption'
+import Env from '@ioc:Adonis/Core/Env'
 import Event from '@ioc:Adonis/Core/Event'
 import User from 'App/Models/User'
 import { DateTime } from 'luxon'
@@ -73,11 +74,15 @@ export default class RegisterController {
     }
   }
 
-  private async send(user: User) {
+  public async send(user: User, host: string | undefined = undefined) {
     const token = Encryption.encrypt({
       id: user.id,
       expired_at: DateTime.now().plus({ day: 1 }).toISO(),
     })
+
+    if (!host) {
+      host = `http://${Env.get('HOST')}:${Env.get('PORT')}`
+    }
 
     await Mail.sendLater((message) => {
       message
@@ -86,7 +91,7 @@ export default class RegisterController {
         .subject('Email verification')
         .htmlView('emails/verify', {
           user,
-          url: `http://localhost:3333/verify?token=${token}`,
+          url: `${host}/verify?token=${token}`,
         })
     })
   }
