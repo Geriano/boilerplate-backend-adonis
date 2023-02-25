@@ -33,7 +33,7 @@
     "created": "user \"{ title }\" telah dibuat",
     "updated": "user \"{ title }\" telah diperbaharui",
     "deleted": "user \"{ title }\" telah dihapus",
-    "password updated": "password has been updated"
+    "password updated": "kata sandi berhasil diperbaharui"
   },
   "auth": {
     "login": {
