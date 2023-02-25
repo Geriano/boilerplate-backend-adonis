@@ -46,8 +46,6 @@ export default class DetectUserLocale {
       context.i18n.switchLocale(language)
     }
 
-    console.log('middleware', language)
-
     await next()
   }
 }

@@ -149,8 +149,6 @@ export default class AuthController {
 
     const transaction = await Database.beginGlobalTransaction()
 
-    console.log(i18n.locale, request.input('lang'))
-
     try {
       if (await Hash.verify(user.password, oldPassword)) {
         user.password = password
