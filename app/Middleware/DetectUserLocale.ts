@@ -24,11 +24,11 @@ export default class DetectUserLocale {
     const availableLocales = I18n.supportedLocales()
     const request = context.request.input('lang')
 
-    if (request) {
-      return context.request.language([request])
+    if (request && availableLocales.includes(request)) {
+      return request
     }
 
-    return context.request.language(availableLocales)
+    return I18n.defaultLocale
   }
 
   /**
@@ -45,6 +45,8 @@ export default class DetectUserLocale {
     if (language) {
       context.i18n.switchLocale(language)
     }
+
+    console.log('middleware', language)
 
     await next()
   }
