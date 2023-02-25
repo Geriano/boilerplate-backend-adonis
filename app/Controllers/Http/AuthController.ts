@@ -157,7 +157,7 @@ export default class AuthController {
         await transaction.commit()
 
         return response.ok({
-          message: i18n.formatMessage('messages.user.updated', {
+          message: i18n.formatMessage('messages.user.password updated', {
             title: user.name,
           }),
         })
