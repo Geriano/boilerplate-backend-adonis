@@ -11,7 +11,7 @@ import { DateTime } from 'luxon'
 export default class RegisterController {
   public async process({ request, response, i18n }: HttpContextContract) {
     const option = { trim: true }
-    const { name, email, username, password } = await request.validate({
+    const { name, email, username, password, next } = await request.validate({
       schema: schema.create({
         name: schema.string(option),
         email: schema.string(option, [
@@ -43,6 +43,7 @@ export default class RegisterController {
           rules.alphaNum(),
           rules.confirmed('password'),
         ]),
+        next: schema.string(option),
       }),
     })
 
@@ -56,7 +57,7 @@ export default class RegisterController {
         password,
       })
 
-      await this.send(user)
+      await this.send(user, next)
       await transaction.commit()
 
       return response.created({
@@ -83,6 +84,8 @@ export default class RegisterController {
     if (!host) {
       host = `http://${Env.get('HOST')}:${Env.get('PORT')}`
     }
+
+    console.log({ host })
 
     await Mail.sendLater((message) => {
       message
