@@ -11,7 +11,6 @@ import mail from '../../../config/mail'
 
 export default class AppConfigurationController {
   public async index({ response }: HttpContextContract) {
-    console.log('test')
     return response.ok({
       app: {
         http: app.http,
