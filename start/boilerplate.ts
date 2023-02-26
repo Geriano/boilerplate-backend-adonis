@@ -99,6 +99,10 @@ Route.group(() => {
   })
     .prefix('/superuser')
     .as('superuser')
+
+  Route.get('_config', 'AppConfigurationController.index')
+    .middleware(['role:superuser,developer'])
+    .as('app-config')
 }).middleware(['auth'])
 
 Route.group(() => {
