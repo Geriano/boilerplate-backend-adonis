@@ -25,6 +25,12 @@ export default class LoginController {
 
     const user = await User.findByOrFail('username', username)
 
+    if (!user.emailVerifiedAt) {
+      return response.forbidden({
+        message: i18n.formatMessage('messages.auth.login.not verified'),
+      })
+    }
+
     if (await Hash.verify(user.password, password)) {
       const { type, token, expiresAt, expiresIn } = await auth.attempt(username, password, {
         expiresIn: '3 day',

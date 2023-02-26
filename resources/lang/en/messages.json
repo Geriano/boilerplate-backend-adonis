@@ -38,7 +38,8 @@
   "auth": {
     "login": {
       "authenticated": "authenticated",
-      "wrong password": "wrong password"
+      "wrong password": "wrong password",
+      "not verified": "email is not verified, please check your inbox to verify"
     },
     "logouted": "logout successfully",
     "verification": "verification email has been sent to { email }, please check your inbox",
