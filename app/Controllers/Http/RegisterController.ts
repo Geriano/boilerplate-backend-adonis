@@ -85,8 +85,6 @@ export default class RegisterController {
       host = `http://${Env.get('HOST')}:${Env.get('PORT')}`
     }
 
-    console.log({ host })
-
     await Mail.sendLater((message) => {
       message
         .from('info@boilerplate.js')

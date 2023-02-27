@@ -5,10 +5,11 @@ import Event from '@ioc:Adonis/Core/Event'
 import User from 'App/Models/User'
 import { DateTime } from 'luxon'
 import Database from '@ioc:Adonis/Lucid/Database'
+import Mail from '@ioc:Adonis/Addons/Mail'
 
 export default class ForgotPasswordController {
-  public async request({ request, response }: HttpContextContract) {
-    const { email } = await request.validate({
+  public async request({ request, response, i18n }: HttpContextContract) {
+    const { email, next } = await request.validate({
       schema: schema.create({
         email: schema.string({ trim: true }, [
           rules.exists({
@@ -19,17 +20,31 @@ export default class ForgotPasswordController {
             allLowercase: true,
           }),
         ]),
+        next: schema.string({ trim: true }),
       }),
     })
 
     const user = await User.findByOrFail('email', email)
-    const token = {
+    const token = Encryption.encrypt({
       id: user.id,
       expired_at: DateTime.now().plus({ day: 1 }).toISO(),
-    }
+    })
+
+    await Mail.sendLater((message) => {
+      message
+        .from('info@boilerplate.js')
+        .to(user.email)
+        .subject('Email verification')
+        .htmlView('emails/reset', {
+          user,
+          url: `${next}/reset?token=${token}`,
+        })
+    })
 
     return response.created({
-      token: Encryption.encrypt(token),
+      message: i18n.formatMessage('messages.auth.verification', {
+        email: user.email,
+      }),
     })
   }
 
