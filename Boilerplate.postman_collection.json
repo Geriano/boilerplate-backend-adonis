@@ -1,0 +1,4019 @@
+{
+	"info": {
+		"_postman_id": "2f2ec169-7b52-43ae-a7d8-c831b9854401",
+		"name": "Boilerplate",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16509650"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let host = pm.environment.get(\"host\")",
+									"",
+									"pm.sendRequest({",
+									"    url: `${host}/csrf`,",
+									"    method: 'POST',",
+									"}, async function (err, response) {",
+									"    const { token } = await response.json()",
+									"    pm.environment.set(\"csrf_token\", token)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const code = pm.response.code",
+									"const response = pm.response.json()",
+									"",
+									"pm.environment.set(\"token\", code === 200 ? response.token : null)",
+									"pm.environment.set('csrf_token', null)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-csrf-token",
+								"value": "{{csrf_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "{{username}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/login",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "validation error",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3333/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3333",
+									"path": [
+										"login"
+									]
+								}
+							},
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "192"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 11 Feb 2023 14:22:39 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"errors\": [\n        {\n            \"rule\": \"required\",\n            \"field\": \"username\",\n            \"message\": \"required validation failed on username\"\n        },\n        {\n            \"rule\": \"required\",\n            \"field\": \"password\",\n            \"message\": \"required validation failed on password\"\n        }\n    ]\n}"
+						},
+						{
+							"name": "wrong password",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "username",
+											"value": "su",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "passwords",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{host}}/login",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"login"
+									]
+								}
+							},
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "60"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 11 Feb 2023 14:23:59 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"errors\": [\n        {\n            \"field\": \"password\",\n            \"message\": \"wrong password\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "logout",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let host = pm.environment.get(\"host\")",
+									"",
+									"pm.sendRequest({",
+									"    url: `${host}/csrf`,",
+									"    method: 'POST',",
+									"}, async function (err, response) {",
+									"    const { token } = await response.json()",
+									"    pm.environment.set(\"csrf_token\", token)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", null)",
+									"pm.environment.set('csrf_token', null)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "x-csrf-token",
+								"value": "{{csrf_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{host}}/logout",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"logout"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3333/logout",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3333",
+									"path": [
+										"logout"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "33"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 11 Feb 2023 14:26:11 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"logout successfully\"\n}"
+						},
+						{
+							"name": "unauthorize",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/logout",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"logout"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "69"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 11 Feb 2023 14:28:37 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"errors\": [\n        {\n            \"message\": \"E_UNAUTHORIZED_ACCESS: Unauthorized access\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/user?lang=id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"user"
+							],
+							"query": [
+								{
+									"key": "lang",
+									"value": "id"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "unauthorized",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3333/user",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3333",
+									"path": [
+										"user"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "69"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 11 Feb 2023 14:29:17 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"errors\": [\n        {\n            \"message\": \"E_UNAUTHORIZED_ACCESS: Unauthorized access\"\n        }\n    ]\n}"
+						},
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/user?lang=id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"user"
+									],
+									"query": [
+										{
+											"key": "lang",
+											"value": "id"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "1656"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 11 Feb 2023 14:34:10 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"842b8658ce701305e8a69db82d1b771c\",\n    \"name\": \"superuser\",\n    \"email\": \"superuser@local.app\",\n    \"username\": \"su\",\n    \"created_at\": \"2023-02-10T15:49:41.907+00:00\",\n    \"updated_at\": \"2023-02-10T15:49:41.908+00:00\",\n    \"deleted_at\": null,\n    \"permissions\": [],\n    \"roles\": [\n        {\n            \"id\": \"842b8658ce701305e8a69db82d1b771c\",\n            \"key\": \"superuser\",\n            \"permissions\": [\n                {\n                    \"id\": \"842b8658ce701305e8a69db82d1b771c\",\n                    \"key\": \"create permission\",\n                    \"title\": \"membuat perizinan\"\n                },\n                {\n                    \"id\": \"ae4280f9a94a7e258a1ae437e60483aa\",\n                    \"key\": \"read permission\",\n                    \"title\": \"megakses perizinan\"\n                },\n                {\n                    \"id\": \"84ae20a93f368c3555f9655b547cbad8\",\n                    \"key\": \"update permission\",\n                    \"title\": \"memperbaharui perizinan\"\n                },\n                {\n                    \"id\": \"510488de55c90be7628eb78ef3401f5d\",\n                    \"key\": \"delete permission\",\n                    \"title\": \"menghapus perizinan\"\n                },\n                {\n                    \"id\": \"585e74cacdaf289518d125bdfc151d4a\",\n                    \"key\": \"create role\",\n                    \"title\": \"membuat peran\"\n                },\n                {\n                    \"id\": \"09b3b7e5c5df2e091213e8a226b906dd\",\n                    \"key\": \"read role\",\n                    \"title\": \"megakses peran\"\n                },\n                {\n                    \"id\": \"ffeb8f2791a54b7afd543328624ed4d7\",\n                    \"key\": \"update role\",\n                    \"title\": \"memperbaharui peran\"\n                },\n                {\n                    \"id\": \"081ee5e500ef8caad3500c5c1e042640\",\n                    \"key\": \"delete role\",\n                    \"title\": \"menghapus peran\"\n                },\n                {\n                    \"id\": \"e9b04041a7647398fa264b75b683f47d\",\n                    \"key\": \"create user\",\n                    \"title\": \"membuat pengguna\"\n                },\n                {\n                    \"id\": \"841736eae4b65e2295088424106eb92d\",\n                    \"key\": \"read user\",\n                    \"title\": \"megakses pengguna\"\n                },\n                {\n                    \"id\": \"f65b789b3e1855037b0a479cad356f87\",\n                    \"key\": \"update user\",\n                    \"title\": \"memperbaharui pengguna\"\n                },\n                {\n                    \"id\": \"45a54ee657f8a5f2a4480b028339bbf5\",\n                    \"key\": \"delete user\",\n                    \"title\": \"menghapus pengguna\"\n                },\n                {\n                    \"id\": \"ad42cfe61d28d4b0c72b01364f9c9f22\",\n                    \"key\": \"configure permission key\",\n                    \"title\": \"configure permission key\"\n                },\n                {\n                    \"id\": \"878b05b115ea1680209ab4c311061c8c\",\n                    \"key\": \"configure role key\",\n                    \"title\": \"configure peran key\"\n                }\n            ],\n            \"title\": \"pengguna super\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "can",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let host = pm.environment.get(\"host\")",
+									"",
+									"pm.sendRequest({",
+									"    url: `${host}/csrf`,",
+									"    method: 'POST',",
+									"}, async function (err, response) {",
+									"    const { token } = await response.json()",
+									"    pm.environment.set(\"csrf_token\", token)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set('csrf_token', null)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-csrf-token",
+								"value": "{{csrf_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "abilities[]",
+									"value": "create user",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/user/can",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"user",
+								"can"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "fail",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "abilities[]",
+											"value": "create users",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://localhost:3333/user/can",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3333",
+									"path": [
+										"user",
+										"can"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Sat, 11 Feb 2023 14:58:13 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": null
+						},
+						{
+							"name": "pass",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "abilities[]",
+											"value": "create user",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{host}}/user/can",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"user",
+										"can"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Sat, 11 Feb 2023 14:58:38 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "register",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let host = pm.environment.get(\"host\")",
+									"",
+									"pm.sendRequest({",
+									"    url: `${host}/csrf`,",
+									"    method: 'POST',",
+									"}, async function (err, response) {",
+									"    const { token } = await response.json()",
+									"    pm.environment.set(\"csrf_token\", token)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set('csrf_token', null)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-csrf-token",
+								"value": "{{csrf_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "csrf_token",
+									"value": "{{csrf_token}}",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "Geriano Adika Putra",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "gerianoadikaputra@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "geri",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "password123",
+									"type": "text"
+								},
+								{
+									"key": "password_confirmation",
+									"value": "password",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/register",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "verify",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/verify?token=",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"verify"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update profile information",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let host = pm.environment.get(\"host\")",
+									"",
+									"pm.sendRequest({",
+									"    url: `${host}/csrf`,",
+									"    method: 'POST',",
+									"}, async function (err, response) {",
+									"    const { token } = await response.json()",
+									"    pm.environment.set(\"csrf_token\", token)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const code = pm.response.code",
+									"const response = pm.response.json()",
+									"",
+									"pm.environment.set('csrf_token', null)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-csrf-token",
+								"value": "{{csrf_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "superuser",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "su",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "superuser@local.app",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/auth/user",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"auth",
+								"user"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-csrf-token",
+										"value": "",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "superuser",
+											"type": "text"
+										},
+										{
+											"key": "username",
+											"value": "su",
+											"type": "text"
+										},
+										{
+											"key": "email",
+											"value": "superuser@local.app",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://localhost:3333/auth/user",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3333",
+									"path": [
+										"auth",
+										"user"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "49"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 25 Feb 2023 10:23:43 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"user \\\"superuser\\\" has been updated\"\n}"
+						},
+						{
+							"name": "validation error",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-csrf-token",
+										"value": "{{csrf_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "superuser",
+											"type": "text"
+										},
+										{
+											"key": "username",
+											"value": "su",
+											"type": "text"
+										},
+										{
+											"key": "email",
+											"value": "superuser@local.app",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{host}}/auth/user",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"auth",
+										"user"
+									]
+								}
+							},
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "179"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 25 Feb 2023 10:24:03 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"errors\": [\n        {\n            \"rule\": \"requiredWhen\",\n            \"field\": \"next\",\n            \"message\": \"requiredWhen validation failed on next\",\n            \"args\": {\n                \"operator\": \"!=\",\n                \"otherField\": \"email\",\n                \"values\": \"superuser@local.app\"\n            }\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "update password",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let host = pm.environment.get(\"host\")",
+									"",
+									"pm.sendRequest({",
+									"    url: `${host}/csrf`,",
+									"    method: 'POST',",
+									"}, async function (err, response) {",
+									"    const { token } = await response.json()",
+									"    pm.environment.set(\"csrf_token\", token)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const code = pm.response.code",
+									"const response = pm.response.json()",
+									"",
+									"pm.environment.set('csrf_token', null)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-csrf-token",
+								"value": "{{csrf_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "old_password",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "password_confirmation",
+									"value": "password",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/auth/user",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"auth",
+								"user"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "validation error",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-csrf-token",
+										"value": "",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "old_password",
+											"value": "pass",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "text"
+										},
+										{
+											"key": "password_confirmation",
+											"value": "password",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://localhost:3333/auth/user",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3333",
+									"path": [
+										"auth",
+										"user"
+									]
+								}
+							},
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "103"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 25 Feb 2023 10:26:46 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"errors\": [\n        {\n            \"field\": \"old_password\",\n            \"message\": \"translation missing: en, messages.auth.wrong-password\"\n        }\n    ]\n}"
+						},
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "x-csrf-token",
+										"value": "{{csrf_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "old_password",
+											"value": "password",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "text"
+										},
+										{
+											"key": "password_confirmation",
+											"value": "password",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{host}}/auth/user",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"auth",
+										"user"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "49"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 25 Feb 2023 10:27:35 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"user \\\"superuser\\\" has been updated\"\n}"
+						}
+					]
+				},
+				{
+					"name": "request reset password",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let host = pm.environment.get(\"host\")",
+									"",
+									"pm.sendRequest({",
+									"    url: `${host}/csrf`,",
+									"    method: 'POST',",
+									"}, async function (err, response) {",
+									"    const { token } = await response.json()",
+									"    pm.environment.set(\"csrf_token\", token)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set('csrf_token', null)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-csrf-token",
+								"value": "{{csrf_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "gerianoadikaputra@gmail.co",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/forgot-password",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"forgot-password"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "email",
+											"value": "gerianoadikaputra@gmail.com",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://localhost:3333/forgot-password",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3333",
+									"path": [
+										"forgot-password"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "186"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 12 Feb 2023 02:37:44 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"token\": \"WtjTfpxCDzq5z_nZdMBhV2knceJjfQzV4ApfL4y6c6mQPlPnEg-HZKWlQp4Gt0FctJk3EdHTNlr19J3nNapZIpKD29PO2SGsFheAIidPqcw.YkRJZURaZ0VxSjN0TGJHbQ.WyVPcVL9i7QuueA98mQEH1Qu8UpKh0Ykj42wyUWepSE\"\n}"
+						},
+						{
+							"name": "request reset password",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "email",
+											"value": "gerianoadikaputra@gmail.co",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{host}}/forgot-password",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"forgot-password"
+									]
+								}
+							},
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "92"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 12 Feb 2023 02:42:59 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"errors\": [\n        {\n            \"rule\": \"exists\",\n            \"field\": \"email\",\n            \"message\": \"exists validation failed on email\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "reset password",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let host = pm.environment.get(\"host\")",
+									"",
+									"pm.sendRequest({",
+									"    url: `${host}/csrf`,",
+									"    method: 'POST',",
+									"}, async function (err, response) {",
+									"    const { token } = await response.json()",
+									"    pm.environment.set(\"csrf_token\", token)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set('csrf_token', null)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-csrf-token",
+								"value": "{{csrf_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "password_confirmation",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/forgot-password",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"forgot-password"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "token",
+											"value": "WtjTfpxCDzq5z_nZdMBhV2knceJjfQzV4ApfL4y6c6mQPlPnEg-HZKWlQp4Gt0FctJk3EdHTNlr19J3nNapZIpKD29PO2SGsFheAIidPqcw.YkRJZURaZ0VxSjN0TGJHbQ.WyVPcVL9i7QuueA98mQEH1Qu8UpKh0Ykj42wyUWepSE",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "password123",
+											"type": "text"
+										},
+										{
+											"key": "password_confirmation",
+											"value": "password123",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://localhost:3333/forgot-password",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3333",
+									"path": [
+										"forgot-password"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "89"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 12 Feb 2023 02:38:49 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"your account password has been reseted, now you can login with new password\"\n}"
+						},
+						{
+							"name": "invalid token",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "token",
+											"value": "WtjTfpxCDzq5z_nZdMBhV2knceJjfQzV4ApfL4y6c6mQPlPnEg-HZKWlQp4Gt0FctJk3EdHTNlr19J3nNapZIpKD29PO2SGsFheAIidPqcw.YkRJZURaZ0VxSjN0TGJHbQ.WyVPcVL9i7QuueA98mQEH1Qu8UpKh0Ykj42wyUWepS",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "password123",
+											"type": "text"
+										},
+										{
+											"key": "password_confirmation",
+											"value": "password123",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{host}}/forgot-password",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"forgot-password"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "25"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 12 Feb 2023 02:42:11 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Bad Request\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Builtin",
+			"item": [
+				{
+					"name": "average request time",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/incoming-request/average",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"incoming-request",
+								"average"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "request csrf token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/csrf",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"csrf"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3333/csrf",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3333",
+									"path": [
+										"csrf"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "314"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 12 Feb 2023 06:35:07 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"token\": \"UFl8crNp_OfkSzBSenst-umb3Mw7V0HQd3edLYoqFlT_GyOFfJsUQpzF2X9ENZ-TBFwU-JETLX6ZGwaeL-NQxKbIlB5P_fQOP-cMhdBK5I76dnw8ozzjVectHjvuJpe6_y7DdEJZ4e6s6P0OxFuxAw5ccR9EWZwWjZo2_1_aRyYraRZ9csMpIkA414dNQjh4-A7VTU2yO1eSxHxist0W74QWMW4dBF2uVPGCHfnaliU.blE4Z1BKWEdVT2tvcmNxXw.n6o4C53IVJaddlllKldtXEqmFuer3xVvh4drSGtkcNM\"\n}"
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Superuser",
+			"item": [
+				{
+					"name": "Permission",
+					"item": [
+						{
+							"name": "all",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/superuser/permission?lang=id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"permission"
+									],
+									"query": [
+										{
+											"key": "lang",
+											"value": "id"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "all",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:3333/superuser/permission",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3333",
+											"path": [
+												"superuser",
+												"permission"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "57"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 04 Feb 2023 13:28:08 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"id\": \"ae4280f9a94a7e258a1ae437e60483aa\",\n        \"name\": \"test\"\n    }\n]"
+								}
+							]
+						},
+						{
+							"name": "store",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let host = pm.environment.get(\"host\")",
+											"",
+											"pm.sendRequest({",
+											"    url: `${host}/csrf`,",
+											"    method: 'POST',",
+											"}, async function (err, response) {",
+											"    const { token } = await response.json()",
+											"    pm.environment.set(\"csrf_token\", token)",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const code = pm.response.code",
+											"const response = pm.response.json()",
+											"",
+											"pm.environment.set('csrf_token', null)",
+											"",
+											"if (code === 200 || code === 201) {",
+											"    const { permission } = response",
+											"    pm.environment.set('permission_id', permission.id)",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-csrf-token",
+										"value": "{{csrf_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "csrf_token",
+											"value": "{{csrf_token}}",
+											"type": "text"
+										},
+										{
+											"key": "name",
+											"value": "test",
+											"type": "text"
+										},
+										{
+											"key": "key",
+											"value": "test",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{host}}/superuser/permission",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"permission"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "form validation error",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "name",
+													"value": "test",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "http://localhost:3333/superuser/permission",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3333",
+											"path": [
+												"superuser",
+												"permission"
+											]
+										}
+									},
+									"status": "Unprocessable Entity",
+									"code": 422,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "160"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 04 Feb 2023 13:31:27 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"errors\": [\n        {\n            \"rule\": \"required\",\n            \"field\": \"name\",\n            \"message\": \"required validation failed\"\n        },\n        {\n            \"rule\": \"required\",\n            \"field\": \"name\",\n            \"message\": \"required validation failed\"\n        }\n    ]\n}"
+								},
+								{
+									"name": "success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "name",
+													"value": "test",
+													"type": "text"
+												},
+												{
+													"key": "key",
+													"value": "test",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{host}}/superuser/permission",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"superuser",
+												"permission"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "129"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 10 Feb 2023 15:37:20 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"permission test has been created\",\n    \"permission\": {\n        \"key\": \"test\",\n        \"id\": \"a90184de6e64a5e094830eb8c5d4784a\",\n        \"title\": \"test\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "update",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let host = pm.environment.get(\"host\")",
+											"",
+											"pm.sendRequest({",
+											"    url: `${host}/csrf`,",
+											"    method: 'POST',",
+											"}, async function (err, response) {",
+											"    const { token } = await response.json()",
+											"    pm.environment.set(\"csrf_token\", token)",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set('csrf_token', null)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-csrf-token",
+										"value": "{{csrf_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "testing",
+											"type": "text"
+										},
+										{
+											"key": "key",
+											"value": "test",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{host}}/superuser/permission/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"permission",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{permission_id}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "not found",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "name",
+													"value": "testq",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "http://localhost:3333/superuser/permission/:id",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3333",
+											"path": [
+												"superuser",
+												"permission",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": null
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "658"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 04 Feb 2023 13:35:27 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"E_ROW_NOT_FOUND: Row not found\",\n    \"stack\": \"Exception: E_ROW_NOT_FOUND: Row not found\\n    at ModelQueryBuilder.firstOrFail (/app/node_modules/@adonisjs/lucid/build/src/Orm/QueryBuilder/index.js:426:19)\\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\\n    at PermissionController.update (/app/app/Controllers/Http/Superuser/PermissionController.ts:96:24)\\n    at Object.PreCompiler.runRouteHandler [as fn] (/app/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)\\n    at Server.handleRequest (/app/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)\",\n    \"code\": \"E_ROW_NOT_FOUND\"\n}"
+								},
+								{
+									"name": "success",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "name",
+													"value": "testing",
+													"type": "text"
+												},
+												{
+													"key": "key",
+													"value": "test",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{host}}/superuser/permission/:id",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"superuser",
+												"permission",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": ""
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "135"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 10 Feb 2023 15:37:57 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"permission testing has been updated\",\n    \"permission\": {\n        \"id\": \"a90184de6e64a5e094830eb8c5d4784a\",\n        \"key\": \"test\",\n        \"title\": \"testing\"\n    }\n}"
+								},
+								{
+									"name": "validation error",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "name",
+													"value": "testing",
+													"type": "text",
+													"disabled": true
+												},
+												{
+													"key": "key",
+													"value": "test",
+													"type": "text",
+													"disabled": true
+												}
+											]
+										},
+										"url": {
+											"raw": "{{host}}/superuser/permission/:id",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"superuser",
+												"permission",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "a90184de6e64a5e094830eb8c5d4784a"
+												}
+											]
+										}
+									},
+									"status": "Unprocessable Entity",
+									"code": 422,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "85"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 10 Feb 2023 15:39:37 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"errors\": [\n        {\n            \"rule\": \"required\",\n            \"field\": \"key\",\n            \"message\": \"required validation failed\"\n        }\n    ]\n}"
+								}
+							]
+						},
+						{
+							"name": "destroy",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let host = pm.environment.get(\"host\")",
+											"",
+											"pm.sendRequest({",
+											"    url: `${host}/csrf`,",
+											"    method: 'POST',",
+											"}, async function (err, response) {",
+											"    const { token } = await response.json()",
+											"    pm.environment.set(\"csrf_token\", token)",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set('csrf_token', null)",
+											"pm.environment.unset('permission_id')"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "x-csrf-token",
+										"value": "{{csrf_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "{{host}}/superuser/permission/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"permission",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{permission_id}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "not found",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:3333/superuser/permission/:id",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3333",
+											"path": [
+												"superuser",
+												"permission",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": null
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "660"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 04 Feb 2023 13:37:27 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"E_ROW_NOT_FOUND: Row not found\",\n    \"stack\": \"Exception: E_ROW_NOT_FOUND: Row not found\\n    at ModelQueryBuilder.firstOrFail (/app/node_modules/@adonisjs/lucid/build/src/Orm/QueryBuilder/index.js:426:19)\\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\\n    at PermissionController.destroy (/app/app/Controllers/Http/Superuser/PermissionController.ts:121:24)\\n    at Object.PreCompiler.runRouteHandler [as fn] (/app/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)\\n    at Server.handleRequest (/app/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)\",\n    \"code\": \"E_ROW_NOT_FOUND\"\n}"
+								},
+								{
+									"name": "success",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{host}}/superuser/permission/:id",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"superuser",
+												"permission",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": ""
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "135"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 10 Feb 2023 15:41:26 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"permission testing has been deleted\",\n    \"permission\": {\n        \"id\": \"a90184de6e64a5e094830eb8c5d4784a\",\n        \"key\": \"test\",\n        \"title\": \"testing\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "handler",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/superuser/permission/handler",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"permission",
+										"handler"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Role",
+					"item": [
+						{
+							"name": "all",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/superuser/role/all?lang=id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"role",
+										"all"
+									],
+									"query": [
+										{
+											"key": "lang",
+											"value": "id"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "success",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:3333/superuser/role/all",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3333",
+											"path": [
+												"superuser",
+												"role",
+												"all"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "99"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 10 Feb 2023 15:52:16 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"id\": \"1\",\n        \"title\": \"superuser\",\n        \"key\": \"superuser\"\n    },\n    {\n        \"id\": \"2\",\n        \"title\": \"developer\",\n        \"key\": \"developer\"\n    }\n]"
+								}
+							]
+						},
+						{
+							"name": "paginate",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/superuser/role?page=1&limit=15&search&order[dir]=asc&order[key]=name",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"role"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "15"
+										},
+										{
+											"key": "search",
+											"value": null
+										},
+										{
+											"key": "order[dir]",
+											"value": "asc"
+										},
+										{
+											"key": "order[key]",
+											"value": "name"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "success",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:3333/superuser/role?page=1&limit=15&search&order[dir]=asc&order[key]=name",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3333",
+											"path": [
+												"superuser",
+												"role"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "1"
+												},
+												{
+													"key": "limit",
+													"value": "15"
+												},
+												{
+													"key": "search",
+													"value": null
+												},
+												{
+													"key": "order[dir]",
+													"value": "asc"
+												},
+												{
+													"key": "order[key]",
+													"value": "name"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "2554"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 10 Feb 2023 15:51:31 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"meta\": {\n        \"total\": 2,\n        \"per_page\": 15,\n        \"current_page\": 1,\n        \"last_page\": 1,\n        \"first_page\": 1,\n        \"first_page_url\": \"/?page=1\",\n        \"last_page_url\": \"/?page=1\",\n        \"next_page_url\": null,\n        \"previous_page_url\": null\n    },\n    \"data\": [\n        {\n            \"id\": \"842b8658ce701305e8a69db82d1b771c\",\n            \"key\": \"superuser\",\n            \"permissions\": [\n                {\n                    \"id\": \"842b8658ce701305e8a69db82d1b771c\",\n                    \"key\": \"create permission\",\n                    \"title\": \"create permission\"\n                },\n                {\n                    \"id\": \"ae4280f9a94a7e258a1ae437e60483aa\",\n                    \"key\": \"read permission\",\n                    \"title\": \"read permission\"\n                },\n                {\n                    \"id\": \"84ae20a93f368c3555f9655b547cbad8\",\n                    \"key\": \"update permission\",\n                    \"title\": \"update permission\"\n                },\n                {\n                    \"id\": \"510488de55c90be7628eb78ef3401f5d\",\n                    \"key\": \"delete permission\",\n                    \"title\": \"delete permission\"\n                },\n                {\n                    \"id\": \"585e74cacdaf289518d125bdfc151d4a\",\n                    \"key\": \"create role\",\n                    \"title\": \"create role\"\n                },\n                {\n                    \"id\": \"09b3b7e5c5df2e091213e8a226b906dd\",\n                    \"key\": \"read role\",\n                    \"title\": \"read role\"\n                },\n                {\n                    \"id\": \"ffeb8f2791a54b7afd543328624ed4d7\",\n                    \"key\": \"update role\",\n                    \"title\": \"update role\"\n                },\n                {\n                    \"id\": \"081ee5e500ef8caad3500c5c1e042640\",\n                    \"key\": \"delete role\",\n                    \"title\": \"delete role\"\n                },\n                {\n                    \"id\": \"e9b04041a7647398fa264b75b683f47d\",\n                    \"key\": \"create user\",\n                    \"title\": \"create user\"\n                },\n                {\n                    \"id\": \"841736eae4b65e2295088424106eb92d\",\n                    \"key\": \"read user\",\n                    \"title\": \"read user\"\n                },\n                {\n                    \"id\": \"f65b789b3e1855037b0a479cad356f87\",\n                    \"key\": \"update user\",\n                    \"title\": \"update user\"\n                },\n                {\n                    \"id\": \"45a54ee657f8a5f2a4480b028339bbf5\",\n                    \"key\": \"delete user\",\n                    \"title\": \"delete user\"\n                },\n                {\n                    \"id\": \"ad42cfe61d28d4b0c72b01364f9c9f22\",\n                    \"key\": \"configure permission key\",\n                    \"title\": \"configure permission key\"\n                },\n                {\n                    \"id\": \"878b05b115ea1680209ab4c311061c8c\",\n                    \"key\": \"configure role key\",\n                    \"title\": \"configure role key\"\n                }\n            ],\n            \"title\": \"superuser\"\n        },\n        {\n            \"id\": \"ae4280f9a94a7e258a1ae437e60483aa\",\n            \"key\": \"developer\",\n            \"permissions\": [\n                {\n                    \"id\": \"842b8658ce701305e8a69db82d1b771c\",\n                    \"key\": \"create permission\",\n                    \"title\": \"create permission\"\n                },\n                {\n                    \"id\": \"ae4280f9a94a7e258a1ae437e60483aa\",\n                    \"key\": \"read permission\",\n                    \"title\": \"read permission\"\n                },\n                {\n                    \"id\": \"84ae20a93f368c3555f9655b547cbad8\",\n                    \"key\": \"update permission\",\n                    \"title\": \"update permission\"\n                },\n                {\n                    \"id\": \"510488de55c90be7628eb78ef3401f5d\",\n                    \"key\": \"delete permission\",\n                    \"title\": \"delete permission\"\n                },\n                {\n                    \"id\": \"585e74cacdaf289518d125bdfc151d4a\",\n                    \"key\": \"create role\",\n                    \"title\": \"create role\"\n                },\n                {\n                    \"id\": \"09b3b7e5c5df2e091213e8a226b906dd\",\n                    \"key\": \"read role\",\n                    \"title\": \"read role\"\n                },\n                {\n                    \"id\": \"ffeb8f2791a54b7afd543328624ed4d7\",\n                    \"key\": \"update role\",\n                    \"title\": \"update role\"\n                },\n                {\n                    \"id\": \"081ee5e500ef8caad3500c5c1e042640\",\n                    \"key\": \"delete role\",\n                    \"title\": \"delete role\"\n                },\n                {\n                    \"id\": \"ad42cfe61d28d4b0c72b01364f9c9f22\",\n                    \"key\": \"configure permission key\",\n                    \"title\": \"configure permission key\"\n                },\n                {\n                    \"id\": \"878b05b115ea1680209ab4c311061c8c\",\n                    \"key\": \"configure role key\",\n                    \"title\": \"configure role key\"\n                }\n            ],\n            \"title\": \"developer\"\n        }\n    ]\n}"
+								}
+							]
+						},
+						{
+							"name": "store",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let host = pm.environment.get(\"host\")",
+											"",
+											"pm.sendRequest({",
+											"    url: `${host}/csrf`,",
+											"    method: 'POST',",
+											"}, async function (err, response) {",
+											"    const { token } = await response.json()",
+											"    pm.environment.set(\"csrf_token\", token)",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const code = pm.response.code",
+											"const response = pm.response.json()",
+											"",
+											"pm.environment.set('csrf_token', null)",
+											"",
+											"if (code === 200 || code === 201) {",
+											"    const { role } = response",
+											"    pm.environment.set('role_id', role.id)",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-csrf-token",
+										"value": "{{csrf_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "key",
+											"value": "test",
+											"type": "text"
+										},
+										{
+											"key": "permissions[]",
+											"value": "read permission",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{host}}/superuser/role",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"role"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "validation error",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "name",
+													"value": "test",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "http://localhost:3333/superuser/role",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3333",
+											"path": [
+												"superuser",
+												"role"
+											]
+										}
+									},
+									"status": "Unprocessable Entity",
+									"code": 422,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "85"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 10 Feb 2023 15:53:21 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"errors\": [\n        {\n            \"rule\": \"required\",\n            \"field\": \"key\",\n            \"message\": \"required validation failed\"\n        }\n    ]\n}"
+								},
+								{
+									"name": "success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "key",
+													"value": "test",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{host}}/superuser/role",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"superuser",
+												"role"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "117"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 10 Feb 2023 15:53:40 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"role test has been created\",\n    \"role\": {\n        \"key\": \"test\",\n        \"id\": \"84ae20a93f368c3555f9655b547cbad8\",\n        \"title\": \"test\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "show",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/superuser/role/:id?lang=id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"role",
+										":id"
+									],
+									"query": [
+										{
+											"key": "lang",
+											"value": "id"
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": ""
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "success",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:3333/superuser/role/:id?lang=id",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3333",
+											"path": [
+												"superuser",
+												"role",
+												":id"
+											],
+											"query": [
+												{
+													"key": "lang",
+													"value": "id"
+												}
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "84ae20a93f368c3555f9655b547cbad8"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "114"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 11 Feb 2023 12:05:23 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"id\": \"84ae20a93f368c3555f9655b547cbad8\",\n    \"key\": \"test\",\n    \"title\": \"translation missing: id, messages.role.value.test\"\n}"
+								},
+								{
+									"name": "not found",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{host}}/superuser/role/:id?lang=id",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"superuser",
+												"role",
+												":id"
+											],
+											"query": [
+												{
+													"key": "lang",
+													"value": "id"
+												}
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "84ae20a93f368c3555f9655b547cbad"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "807"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 11 Feb 2023 12:06:01 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"E_ROW_NOT_FOUND: Row not found\",\n    \"stack\": \"Exception: E_ROW_NOT_FOUND: Row not found\\n    at ModelQueryBuilder.firstOrFail (/app/node_modules/@adonisjs/lucid/build/src/Orm/QueryBuilder/index.js:426:19)\\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\\n    at RoleController.show (/app/app/Controllers/Http/Superuser/RoleController.ts:110:18)\\n    at Object.PreCompiler.runRouteHandler [as fn] (/app/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)\\n    at LogIncomingRequest.handle (/app/app/Middleware/LogIncomingRequest.ts:11:5)\\n    at DetectUserLocale.handle (/app/app/Middleware/DetectUserLocale.ts:49:5)\\n    at Server.handleRequest (/app/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)\",\n    \"code\": \"E_ROW_NOT_FOUND\"\n}"
+								}
+							]
+						},
+						{
+							"name": "update",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let host = pm.environment.get(\"host\")",
+											"",
+											"pm.sendRequest({",
+											"    url: `${host}/csrf`,",
+											"    method: 'POST',",
+											"}, async function (err, response) {",
+											"    const { token } = await response.json()",
+											"    pm.environment.set(\"csrf_token\", token)",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set('csrf_token', null)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-csrf-token",
+										"value": "{{csrf_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "key",
+											"value": "test",
+											"type": "text"
+										},
+										{
+											"key": "name",
+											"value": "testing",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{host}}/superuser/role/:id?lang=id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"role",
+										":id"
+									],
+									"query": [
+										{
+											"key": "lang",
+											"value": "id"
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{role_id}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "not found",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "name",
+													"value": "test",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "http://localhost:3333/superuser/role/:id",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3333",
+											"path": [
+												"superuser",
+												"role",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "84ae20a93f368c3555f9655b547cbad"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "646"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 10 Feb 2023 15:54:19 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"E_ROW_NOT_FOUND: Row not found\",\n    \"stack\": \"Exception: E_ROW_NOT_FOUND: Row not found\\n    at ModelQueryBuilder.firstOrFail (/app/node_modules/@adonisjs/lucid/build/src/Orm/QueryBuilder/index.js:426:19)\\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\\n    at RoleController.update (/app/app/Controllers/Http/Superuser/RoleController.ts:92:18)\\n    at Object.PreCompiler.runRouteHandler [as fn] (/app/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)\\n    at Server.handleRequest (/app/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)\",\n    \"code\": \"E_ROW_NOT_FOUND\"\n}"
+								},
+								{
+									"name": "validation error",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "name",
+													"value": "testing",
+													"type": "text",
+													"disabled": true
+												},
+												{
+													"key": "key",
+													"value": "test",
+													"type": "text",
+													"disabled": true
+												}
+											]
+										},
+										"url": {
+											"raw": "{{host}}/superuser/role/:id",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"superuser",
+												"role",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "84ae20a93f368c3555f9655b547cbad8"
+												}
+											]
+										}
+									},
+									"status": "Unprocessable Entity",
+									"code": 422,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "85"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 10 Feb 2023 15:55:06 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"errors\": [\n        {\n            \"rule\": \"required\",\n            \"field\": \"key\",\n            \"message\": \"required validation failed\"\n        }\n    ]\n}"
+								},
+								{
+									"name": "success",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "name",
+													"value": "testing",
+													"type": "text"
+												},
+												{
+													"key": "key",
+													"value": "test",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{host}}/superuser/role/:id",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"superuser",
+												"role",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": ""
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "123"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 10 Feb 2023 15:55:38 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"role testing has been updated\",\n    \"role\": {\n        \"id\": \"84ae20a93f368c3555f9655b547cbad8\",\n        \"key\": \"test\",\n        \"title\": \"testing\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "destroy",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let host = pm.environment.get(\"host\")",
+											"",
+											"pm.sendRequest({",
+											"    url: `${host}/csrf`,",
+											"    method: 'POST',",
+											"}, async function (err, response) {",
+											"    const { token } = await response.json()",
+											"    pm.environment.set(\"csrf_token\", token)",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set('csrf_token', null)",
+											"pm.environment.unset('role_id')"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "x-csrf-token",
+										"value": "{{csrf_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "{{host}}/superuser/role/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"role",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{role_id}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "not found",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:3333/superuser/role/:id",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3333",
+											"path": [
+												"superuser",
+												"role",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": null
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "648"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 10 Feb 2023 15:56:10 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"E_ROW_NOT_FOUND: Row not found\",\n    \"stack\": \"Exception: E_ROW_NOT_FOUND: Row not found\\n    at ModelQueryBuilder.firstOrFail (/app/node_modules/@adonisjs/lucid/build/src/Orm/QueryBuilder/index.js:426:19)\\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\\n    at RoleController.destroy (/app/app/Controllers/Http/Superuser/RoleController.ts:132:18)\\n    at Object.PreCompiler.runRouteHandler [as fn] (/app/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)\\n    at Server.handleRequest (/app/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)\",\n    \"code\": \"E_ROW_NOT_FOUND\"\n}"
+								},
+								{
+									"name": "success",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{host}}/superuser/role/:id",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"superuser",
+												"role",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": ""
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-length",
+											"value": "123"
+										},
+										{
+											"key": "content-type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 10 Feb 2023 15:56:27 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"role testing has been deleted\",\n    \"role\": {\n        \"id\": \"84ae20a93f368c3555f9655b547cbad8\",\n        \"key\": \"test\",\n        \"title\": \"testing\"\n    }\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "User",
+					"item": [
+						{
+							"name": "paginate",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/superuser/user?page=1&limit=15&search&order[dir]=asc&order[key]=name",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"user"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "15"
+										},
+										{
+											"key": "search",
+											"value": null
+										},
+										{
+											"key": "order[dir]",
+											"value": "asc"
+										},
+										{
+											"key": "order[key]",
+											"value": "name"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "store",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let host = pm.environment.get(\"host\")",
+											"",
+											"pm.sendRequest({",
+											"    url: `${host}/csrf`,",
+											"    method: 'POST',",
+											"}, async function (err, response) {",
+											"    const { token } = await response.json()",
+											"    pm.environment.set(\"csrf_token\", token)",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const code = pm.response.code",
+											"const response = pm.response.json()",
+											"",
+											"pm.environment.set('csrf_token', null)",
+											"",
+											"if (code === 200 || code === 201) {",
+											"    const { user } = response",
+											"    pm.environment.set('user_id', user.id)",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-csrf-token",
+										"value": "{{csrf_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "csrf_token",
+											"value": "{{csrf_token}}",
+											"type": "text"
+										},
+										{
+											"key": "name",
+											"value": "test",
+											"type": "text"
+										},
+										{
+											"key": "email",
+											"value": "test@local.app",
+											"type": "text"
+										},
+										{
+											"key": "username",
+											"value": "test",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "password",
+											"type": "text"
+										},
+										{
+											"key": "password_confirmation",
+											"value": "password",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{host}}/superuser/user",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let host = pm.environment.get(\"host\")",
+											"",
+											"pm.sendRequest({",
+											"    url: `${host}/csrf`,",
+											"    method: 'POST',",
+											"}, async function (err, response) {",
+											"    const { token } = await response.json()",
+											"    pm.environment.set(\"csrf_token\", token)",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set('csrf_token', null)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-csrf-token",
+										"value": "{{csrf_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "test",
+											"type": "text"
+										},
+										{
+											"key": "email",
+											"value": "test@local.app",
+											"type": "text"
+										},
+										{
+											"key": "username",
+											"value": "test",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{host}}/superuser/user/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"user",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{user_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update password",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let host = pm.environment.get(\"host\")",
+											"",
+											"pm.sendRequest({",
+											"    url: `${host}/csrf`,",
+											"    method: 'POST',",
+											"}, async function (err, response) {",
+											"    const { token } = await response.json()",
+											"    pm.environment.set(\"csrf_token\", token)",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set('csrf_token', null)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-csrf-token",
+										"value": "{{csrf_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "password",
+											"value": "password",
+											"type": "text"
+										},
+										{
+											"key": "password_confirmation",
+											"value": "password",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{host}}/superuser/user/:id/password",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"user",
+										":id",
+										"password"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{user_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "destroy",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let host = pm.environment.get(\"host\")",
+											"",
+											"pm.sendRequest({",
+											"    url: `${host}/csrf`,",
+											"    method: 'POST',",
+											"}, async function (err, response) {",
+											"    const { token } = await response.json()",
+											"    pm.environment.set(\"csrf_token\", token)",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set('csrf_token', null)",
+											"pm.environment.unset('user_id')"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "x-csrf-token",
+										"value": "{{csrf_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "{{host}}/superuser/user/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"superuser",
+										"user",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{user_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Translation",
+			"item": [
+				{
+					"name": "Language list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/translation",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"translation"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3333/translation",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3333",
+									"path": [
+										"translation"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "11"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 23 Feb 2023 00:14:40 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    \"en\",\n    \"id\"\n]"
+						}
+					]
+				},
+				{
+					"name": "Translation list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/translation/en",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"translation",
+								"en"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3333/translation/en",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3333",
+									"path": [
+										"translation",
+										"en"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "content-length",
+									"value": "12"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 23 Feb 2023 00:25:12 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    \"messages\"\n]"
+						}
+					]
+				},
+				{
+					"name": "Translation tree",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/translation/en/messages",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"translation",
+								"en",
+								"messages"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Not Found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3333/translation/en/messagess",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3333",
+									"path": [
+										"translation",
+										"en",
+										"messagess"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Thu, 23 Feb 2023 00:27:51 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": null
+						}
+					]
+				}
+			]
+		}
+	]
+}
