@@ -1,5 +1,8 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
+import { string } from '@ioc:Adonis/Core/Helpers'
+import { existsSync, unlinkSync } from 'fs'
+import Application from '@ioc:Adonis/Core/Application'
 import Permission from 'App/Models/Permission'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Event from '@ioc:Adonis/Core/Event'
@@ -69,7 +72,7 @@ export default class AuthController {
   public async updateProfileInformation({ auth, request, response, i18n }: HttpContextContract) {
     const user = auth.user!
     const option = { trim: true }
-    const { name, username, email, next } = await request.validate({
+    const { name, username, email, next, photo } = await request.validate({
       schema: schema.create({
         name: schema.string(option),
         username: schema.string(option, [
@@ -100,6 +103,9 @@ export default class AuthController {
           }),
           rules.requiredWhen('email', '!=', user.email),
         ]),
+        photo: schema.file({
+          extnames: ['png', 'jpg', 'jpeg', 'webp'],
+        }),
       }),
     })
 
@@ -115,6 +121,23 @@ export default class AuthController {
       user.name = name
       user.username = username
       user.email = email
+
+      if (photo && photo.isValid) {
+        if (user.profilePhotoPath) {
+          const path = Application.publicPath(user.profilePhotoPath)
+          existsSync(path) && unlinkSync(path)
+        }
+
+        const random = string.generateRandom(32)
+        const ext = photo.extname || ''
+        const name = ext ? `${random}.${ext}` : random
+        photo.move(Application.publicPath('/uploads'), {
+          name,
+          overwrite: true,
+        })
+
+        user.profilePhotoPath = `/uploads/${name}`
+      }
 
       await user.save()
       await Event.emit('auth:profile-updated', user)
@@ -132,6 +155,37 @@ export default class AuthController {
         message: `${e}`,
       })
     }
+  }
+
+  public async removeProfilePhoto({ auth, response, i18n }: HttpContextContract) {
+    const user = auth.user!
+
+    if (user.profilePhotoPath) {
+      const path = Application.publicPath(user.profilePhotoPath)
+
+      if (existsSync(path)) {
+        const transaction = await Database.beginGlobalTransaction()
+
+        try {
+          unlinkSync(path)
+          user.profilePhotoPath = null
+          await user.save()
+          await transaction.commit()
+        } catch (e) {
+          await transaction.rollback()
+
+          return response.internalServerError({
+            message: `${e.message}`,
+          })
+        }
+      }
+    }
+
+    return response.ok({
+      message: i18n.formatMessage('messages.user.updated', {
+        title: user.name,
+      }),
+    })
   }
 
   public async updatePassword({ auth, request, response, i18n }: HttpContextContract) {

@@ -14,6 +14,7 @@ Route.group(() => {
     Route.group(() => {
       Route.put('/', 'AuthController.updateProfileInformation').as('update-profile-information')
       Route.patch('/', 'AuthController.updatePassword').as('update-password')
+      Route.delete('/', 'AuthController.removeProfilePhoto').as('remove-profile-photo')
     })
       .prefix('/user')
       .as('user')

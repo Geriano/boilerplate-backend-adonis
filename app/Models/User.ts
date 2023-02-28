@@ -10,6 +10,7 @@ import {
   ManyToMany,
   beforeFind,
   ModelQueryBuilderContract,
+  computed,
 } from '@ioc:Adonis/Lucid/Orm'
 import Permission from './Permission'
 import Role from './Role'
@@ -20,6 +21,9 @@ export default class User extends compose(BaseModel, SoftDeletes) {
 
   @column()
   public name: string
+
+  @column()
+  public profilePhotoPath: string | null
 
   @column()
   public email: string
