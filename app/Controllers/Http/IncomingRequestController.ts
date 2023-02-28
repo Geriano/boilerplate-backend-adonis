@@ -9,21 +9,19 @@ export default class IncomingRequestController {
       .from(`${IncomingRequest.table} as x`)
       .whereRaw('x.name = y.name')
       .whereRaw('x.method = y.method')
-      .whereRaw('x.path = y.path')
       .toQuery()
 
     const requests = await Database.query()
       .select([
         'name',
         'method',
-        'path',
         Database.raw(`sum(time) / (${count}) average`),
         Database.raw(`min(time) min`),
         Database.raw(`max(time) max`),
         Database.raw(`(${count}) count`),
       ])
       .from(`${IncomingRequest.table} as y`)
-      .groupBy(['method', 'name', 'path'])
+      .groupBy(['method', 'name'])
       .exec()
 
     return response.ok(
