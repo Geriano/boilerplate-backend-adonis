@@ -2,7 +2,6 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Role from 'App/Models/Role'
-import Env from '@ioc:Adonis/Core/Env'
 import Permission from 'App/Models/Permission'
 
 export default class RoleController {
@@ -109,18 +108,11 @@ export default class RoleController {
   }
 
   public async show({ response, params }: HttpContextContract) {
-    const role = await Role.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [params.id])
-      .firstOrFail()
-
-    return response.ok(role)
+    return response.ok(await Role.findOrFail(params.role))
   }
 
   public async update({ request, response, params, i18n }: HttpContextContract) {
-    const role = await Role.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [params.id])
-      .firstOrFail()
-
+    const role = await Role.findOrFail(params.role)
     const { name, key, permissions } = await request.validate({
       schema: schema.create({
         name: schema.string.nullableAndOptional({ trim: true }),
@@ -174,10 +166,7 @@ export default class RoleController {
   }
 
   public async destroy({ response, params, i18n }: HttpContextContract) {
-    const role = await Role.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [params.id])
-      .firstOrFail()
-
+    const role = await Role.findOrFail(params.role)
     const transaction = await Database.beginGlobalTransaction()
 
     try {
@@ -200,17 +189,8 @@ export default class RoleController {
   }
 
   public async togglePermission({ response, params, i18n }: HttpContextContract) {
-    const { roleId, permissionId } = params
-
-    const role = await Role.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [roleId])
-      .preload('permissions')
-      .firstOrFail()
-
-    const permission = await Permission.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Permission.table}.id)) = ?`, [permissionId])
-      .firstOrFail()
-
+    const role = await Role.findOrFail(params.role)
+    const permission = await Permission.findOrFail(params.permission)
     const transaction = await Database.beginGlobalTransaction()
 
     try {

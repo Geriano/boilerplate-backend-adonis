@@ -7,22 +7,12 @@ import {
   computed,
   manyToMany,
 } from '@ioc:Adonis/Lucid/Orm'
-import { createHash } from 'crypto'
-import Env from '@ioc:Adonis/Core/Env'
 import HttpContext from '@ioc:Adonis/Core/HttpContext'
 import Role from './Role'
 
 export default class Permission extends BaseModel {
-  @column({
-    isPrimary: true,
-    serialize(value) {
-      return createHash('md5')
-        .update(`${Env.get('APP_KEY')}${value}`)
-        .digest()
-        .toString('hex')
-    },
-  })
-  public id: number
+  @column({ isPrimary: true })
+  public id: string
 
   @column({
     serializeAs: null,
@@ -63,6 +53,7 @@ export default class Permission extends BaseModel {
   @afterCreate()
   public static async attachPermissionToSuperuser(permission: Permission) {
     const superuser = await Role.findByOrFail('key', 'superuser')
-    await superuser.related('permissions').attach([permission.$attributes.id])
+
+    await superuser.related('permissions').attach([permission.id])
   }
 }

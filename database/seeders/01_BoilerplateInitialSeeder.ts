@@ -31,10 +31,10 @@ export default class extends BaseSeeder {
       key: 'developer',
     })
 
-    su.related('roles').attach([superuser.$attributes.id])
-    dev.related('roles').attach([developer.$attributes.id])
+    su.related('roles').attach([superuser.id])
+    dev.related('roles').attach([developer.id])
 
-    const permissions: number[] = []
+    const permissions: string[] = []
 
     for (const name of this.permissions) {
       for (const ability of ['create', 'read', 'update', 'delete']) {
@@ -43,7 +43,7 @@ export default class extends BaseSeeder {
         })
 
         if (name !== 'user') {
-          permissions.push(permission.$attributes.id)
+          permissions.push(permission.id)
         }
       }
     }

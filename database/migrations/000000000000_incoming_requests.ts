@@ -1,11 +1,14 @@
+/* eslint-disable prettier/prettier */
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
 export default class extends BaseSchema {
   protected tableName = 'incoming_requests'
 
   public async up() {
+    this.schema.raw('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
     this.schema.createTable(this.tableName, (table) => {
-      table.bigIncrements('id').unsigned()
+      table.uuid('id')
+          .primary()
       table.string('name')
       table.string('method')
       table.string('path')
@@ -18,6 +21,7 @@ export default class extends BaseSchema {
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
     })
+    this.schema.raw(`ALTER TABLE ${this.tableName} ALTER COLUMN id SET DEFAULT uuid_generate_v4()`)
   }
 
   public async down() {

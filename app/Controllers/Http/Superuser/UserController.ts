@@ -1,10 +1,10 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Database from '@ioc:Adonis/Lucid/Database'
-import Env from '@ioc:Adonis/Core/Env'
 import User from 'App/Models/User'
 import Role from 'App/Models/Role'
 import Permission from 'App/Models/Permission'
+import { DateTime } from 'luxon'
 
 export default class UserController {
   public async paginate({ request, response }: HttpContextContract) {
@@ -112,6 +112,7 @@ export default class UserController {
         email,
         username,
         password,
+        emailVerifiedAt: DateTime.now(),
       })
 
       if (Array.isArray(permissions)) {
@@ -150,18 +151,11 @@ export default class UserController {
   }
 
   public async show({ response, params }: HttpContextContract) {
-    return response.ok(
-      await User.query()
-        .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${User.table}.id)) = ?`, [params.id])
-        .firstOrFail()
-    )
+    return response.ok(await User.findOrFail(params.user))
   }
 
   public async update({ request, response, params, i18n }: HttpContextContract) {
-    const user = await User.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${User.table}.id)) = ?`, [params.id])
-      .firstOrFail()
-
+    const user = await User.findOrFail(params.user)
     const { name, email, username, roles, permissions } = await this.validate(request, user)
 
     const transaction = await Database.beginGlobalTransaction()
@@ -207,7 +201,8 @@ export default class UserController {
     }
   }
 
-  public async updatePassword({ request, response, i18n }: HttpContextContract) {
+  public async updatePassword({ request, response, params, i18n }: HttpContextContract) {
+    const user = await User.findOrFail(params.user)
     const { password } = await request.validate({
       schema: schema.create({
         password: schema.string({ trim: true }, [
@@ -218,12 +213,6 @@ export default class UserController {
         password_confirmation: schema.string({ trim: true }, [rules.confirmed('password')]),
       }),
     })
-
-    const { id } = request.params()
-
-    const user = await User.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${User.table}.id)) = ?`, [id])
-      .firstOrFail()
 
     const transaction = await Database.beginGlobalTransaction()
 
@@ -244,12 +233,8 @@ export default class UserController {
     }
   }
 
-  public async destroy({ request, response, i18n }: HttpContextContract) {
-    const { id } = request.params()
-    const user = await User.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${User.table}.id)) = ?`, [id])
-      .firstOrFail()
-
+  public async destroy({ response, params, i18n }: HttpContextContract) {
+    const user = await User.findOrFail(params.user)
     const transaction = await Database.beginGlobalTransaction()
 
     try {
@@ -272,17 +257,8 @@ export default class UserController {
   }
 
   public async togglePermission({ response, params, i18n }: HttpContextContract) {
-    const user = await User.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${User.table}.id)) = ?`, [params.user])
-      .preload('permissions')
-      .firstOrFail()
-
-    const permission = await Permission.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Permission.table}.id)) = ?`, [
-        params.permission,
-      ])
-      .firstOrFail()
-
+    const user = await User.findOrFail(params.user)
+    const permission = await Permission.findOrFail(params.permission)
     const transaction = await Database.beginGlobalTransaction()
 
     try {
@@ -310,15 +286,8 @@ export default class UserController {
   }
 
   public async toggleRole({ response, params, i18n }: HttpContextContract) {
-    const user = await User.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${User.table}.id)) = ?`, [params.user])
-      .preload('roles')
-      .firstOrFail()
-
-    const role = await Role.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Role.table}.id)) = ?`, [params.role])
-      .firstOrFail()
-
+    const user = await User.findOrFail(params.user)
+    const role = await Role.findOrFail(params.role)
     const transaction = await Database.beginGlobalTransaction()
 
     try {

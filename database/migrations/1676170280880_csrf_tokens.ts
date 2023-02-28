@@ -6,8 +6,8 @@ export default class extends BaseSchema {
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.bigIncrements('id')
-        .unsigned()
+      table.uuid('id')
+        .primary()
       table.string('ip', 45)
       table.timestamp('expired_at', { useTz: true })
       table.boolean('used').defaultTo(false)
@@ -18,6 +18,7 @@ export default class extends BaseSchema {
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
     })
+    this.schema.raw(`ALTER TABLE ${this.tableName} ALTER COLUMN id SET DEFAULT uuid_generate_v4()`)
   }
 
   public async down() {

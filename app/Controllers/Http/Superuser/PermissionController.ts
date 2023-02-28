@@ -2,7 +2,6 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Permission from 'App/Models/Permission'
-import Env from '@ioc:Adonis/Core/Env'
 
 export default class PermissionController {
   public async all({ response }: HttpContextContract) {
@@ -51,10 +50,7 @@ export default class PermissionController {
   }
 
   public async update({ request, response, params, i18n }: HttpContextContract) {
-    const permission = await Permission.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Permission.table}.id)) = ?`, [params.id])
-      .firstOrFail()
-
+    const permission = await Permission.findOrFail(params.permission)
     const { name, key } = await request.validate({
       schema: schema.create({
         name: schema.string.nullableAndOptional({ trim: true }),
@@ -93,11 +89,7 @@ export default class PermissionController {
   }
 
   public async destroy({ response, params, i18n }: HttpContextContract) {
-    const id = params.id as string
-    const permission = await Permission.query()
-      .whereRaw(`md5(concat('${Env.get('APP_KEY')}', ${Permission.table}.id)) = ?`, [id])
-      .firstOrFail()
-
+    const permission = await Permission.findOrFail(params.permission)
     const transaction = await Database.beginGlobalTransaction()
 
     try {

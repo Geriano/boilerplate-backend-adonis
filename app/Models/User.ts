@@ -11,22 +11,12 @@ import {
   beforeFind,
   ModelQueryBuilderContract,
 } from '@ioc:Adonis/Lucid/Orm'
-import { createHash } from 'crypto'
-import Env from '@ioc:Adonis/Core/Env'
 import Permission from './Permission'
 import Role from './Role'
 
 export default class User extends compose(BaseModel, SoftDeletes) {
-  @column({
-    isPrimary: true,
-    serialize(value) {
-      return createHash('md5')
-        .update(`${Env.get('APP_KEY')}${value}`)
-        .digest()
-        .toString('hex')
-    },
-  })
-  public id: number
+  @column({ isPrimary: true })
+  public id: string
 
   @column()
   public name: string

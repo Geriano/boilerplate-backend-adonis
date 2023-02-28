@@ -4,26 +4,17 @@ import {
   ManyToMany,
   ModelQueryBuilderContract,
   beforeFetch,
+  beforeFind,
   column,
   computed,
   manyToMany,
 } from '@ioc:Adonis/Lucid/Orm'
-import { createHash } from 'crypto'
-import Env from '@ioc:Adonis/Core/Env'
 import Permission from './Permission'
 import { HttpContext } from '@adonisjs/core/build/standalone'
 
 export default class Role extends BaseModel {
-  @column({
-    isPrimary: true,
-    serialize(value) {
-      return createHash('md5')
-        .update(`${Env.get('APP_KEY')}${value}`)
-        .digest()
-        .toString('hex')
-    },
-  })
-  public id: number
+  @column({ isPrimary: true })
+  public id: string
 
   @column({
     serializeAs: null,
@@ -62,7 +53,12 @@ export default class Role extends BaseModel {
   public permissions: ManyToMany<typeof Permission>
 
   @beforeFetch()
-  public static async preloadPermissions(query: ModelQueryBuilderContract<typeof Role>) {
+  public static async fetchPermissions(query: ModelQueryBuilderContract<typeof Role>) {
+    query.preload('permissions')
+  }
+
+  @beforeFind()
+  public static async findPermissions(query: ModelQueryBuilderContract<typeof Role>) {
     query.preload('permissions')
   }
 

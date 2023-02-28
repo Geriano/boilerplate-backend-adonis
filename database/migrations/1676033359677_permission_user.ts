@@ -6,13 +6,14 @@ export default class extends BaseSchema {
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.bigIncrements('id').unsigned()
-      table.bigInteger('permission_id')
+      table.uuid('id')
+        .primary()
+      table.uuid('permission_id')
         .unsigned()
         .references('id')
         .inTable('permissions')
         .onDelete('cascade')
-      table.bigInteger('user_id')
+      table.uuid('user_id')
         .unsigned()
         .references('id')
         .inTable('users')
@@ -24,6 +25,7 @@ export default class extends BaseSchema {
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
     })
+    this.schema.raw(`ALTER TABLE ${this.tableName} ALTER COLUMN id SET DEFAULT uuid_generate_v4()`)
   }
 
   public async down() {
