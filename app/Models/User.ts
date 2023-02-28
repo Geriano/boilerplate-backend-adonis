@@ -10,7 +10,6 @@ import {
   ManyToMany,
   beforeFind,
   ModelQueryBuilderContract,
-  computed,
 } from '@ioc:Adonis/Lucid/Orm'
 import Permission from './Permission'
 import Role from './Role'
