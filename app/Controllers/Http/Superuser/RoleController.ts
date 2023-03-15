@@ -1,82 +1,64 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
-import Database from '@ioc:Adonis/Lucid/Database'
+import { __, send, transaction, validate } from 'App/helpers'
+import { bind } from '@adonisjs/route-model-binding'
 import Role from 'App/Models/Role'
 import Permission from 'App/Models/Permission'
 
 export default class RoleController {
-  public async all({ response }: HttpContextContract) {
-    try {
+  public async all() {
+    return send(async () => {
       const roles = await Role.all()
 
-      return response.ok(
-        roles.map((role) => {
-          const data = role.serialize()
+      return roles.map((role) => {
+        const data = role.serialize()
 
-          return {
-            id: data.id,
-            title: data.title,
-            key: data.key,
-          }
+        return {
+          id: data.id,
+          title: data.title,
+          key: data.key,
+        }
+      })
+    })
+  }
+
+  public async index() {
+    const { page, limit, search, order } = await validate({
+      page: schema.number(),
+      limit: schema.number(),
+      search: schema.string.optional(),
+      order: schema.object().members({
+        dir: schema.enum(['asc', 'desc']),
+        key: schema.enum(['name', 'key']),
+      }),
+    })
+
+    return send(
+      Role.query()
+        .where((query) => {
+          const s = `%${search || ''}%`
+          query.whereILike('name', s).orWhereILike('key', s)
         })
-      )
-    } catch (e) {
-      return response.internalServerError({
-        message: `${e}`,
-      })
-    }
+        .orderBy(order.key, order.dir as 'asc' | 'desc')
+        .preload('permissions', (query) => query.select(['id', 'name', 'key']))
+        .paginate(page, limit)
+    )
   }
 
-  public async paginate({ request, response }: HttpContextContract) {
-    const { page, limit, search, order } = await request.validate({
-      schema: schema.create({
-        page: schema.number(),
-        limit: schema.number(),
-        search: schema.string.optional(),
-        order: schema.object().members({
-          dir: schema.enum(['asc', 'desc']),
-          key: schema.enum(['name', 'key']),
+  public async store() {
+    const { name, key, permissions } = await validate({
+      name: schema.string.nullableAndOptional({ trim: true }),
+      key: schema.string({ trim: true }, [
+        rules.unique({
+          table: Role.table,
+          column: 'key',
         }),
-      }),
+      ]),
+      permissions: schema.array
+        .nullableAndOptional()
+        .members(schema.number([rules.exists({ table: Permission.table, column: 'id' })])),
     })
 
-    try {
-      return response.ok(
-        await Role.query()
-          .where((query) => {
-            const s = `%${search || ''}%`
-            query.whereILike('name', s).orWhereILike('key', s)
-          })
-          .orderBy(order.key, order.dir as 'asc' | 'desc')
-          .preload('permissions', (query) => query.select(['id', 'name', 'key']))
-          .paginate(page, limit)
-      )
-    } catch (e) {
-      return response.internalServerError({
-        message: `${e}`,
-      })
-    }
-  }
-
-  public async store({ request, response, i18n }: HttpContextContract) {
-    const { name, key, permissions } = await request.validate({
-      schema: schema.create({
-        name: schema.string.nullableAndOptional({ trim: true }),
-        key: schema.string({ trim: true }, [
-          rules.unique({
-            table: Role.table,
-            column: 'key',
-          }),
-        ]),
-        permissions: schema.array
-          .nullableAndOptional()
-          .members(schema.number([rules.exists({ table: Permission.table, column: 'id' })])),
-      }),
-    })
-
-    const transaction = await Database.beginGlobalTransaction()
-
-    try {
+    return transaction(async () => {
       const role = await Role.create({ name, key })
 
       if (permissions) {
@@ -90,50 +72,45 @@ export default class RoleController {
       }
 
       await role.load('permissions')
-      await transaction.commit()
 
-      return response.created({
-        message: i18n.formatMessage('messages.role.created', {
+      return {
+        message: __('messages.role.created', {
           title: role.title,
         }),
         role,
-      })
-    } catch (e) {
-      await transaction.rollback()
-
-      return response.internalServerError({
-        message: `${e}`,
-      })
-    }
+      }
+    })
   }
 
-  public async show({ response, params }: HttpContextContract) {
-    return response.ok(await Role.findOrFail(params.role))
+  @bind()
+  public async show(_, role: Role) {
+    return role
   }
 
-  public async update({ request, response, params, i18n }: HttpContextContract) {
-    const role = await Role.findOrFail(params.role)
-    const { name, key, permissions } = await request.validate({
-      schema: schema.create({
-        name: schema.string.nullableAndOptional({ trim: true }),
-        key: schema.string({ trim: true }, [
-          rules.unique({
-            table: Role.table,
-            column: 'key',
-            whereNot: {
-              id: role.$attributes.id,
-            },
-          }),
-        ]),
-        permissions: schema.array
-          .nullableAndOptional()
-          .members(schema.number([rules.exists({ table: Permission.table, column: 'id' })])),
-      }),
+  @bind()
+  public async update(_, role: Role) {
+    const { name, key, permissions } = await validate({
+      name: schema.string.nullableAndOptional({ trim: true }),
+      key: schema.string({ trim: true }, [
+        rules.unique({
+          table: Role.table,
+          column: 'key',
+          whereNot: {
+            id: role.id,
+          },
+        }),
+      ]),
+      permissions: schema.array
+        .nullableAndOptional()
+        .members(
+          schema.string([
+            rules.uuid({ version: 4 }),
+            rules.exists({ table: Permission.table, column: 'id' }),
+          ])
+        ),
     })
 
-    const transaction = await Database.beginGlobalTransaction()
-
-    try {
+    return transaction(async () => {
       role.key = key
       name !== undefined && (role.name = name)
       await role.save()
@@ -148,72 +125,44 @@ export default class RoleController {
         )
       }
 
-      await transaction.commit()
-
-      return response.ok({
-        message: i18n.formatMessage('messages.role.updated', {
+      return {
+        message: __('messages.role.updated', {
           title: role.title,
         }),
         role,
-      })
-    } catch (e) {
-      await transaction.rollback()
-
-      return response.internalServerError({
-        message: `${e}`,
-      })
-    }
+      }
+    })
   }
 
-  public async destroy({ response, params, i18n }: HttpContextContract) {
-    const role = await Role.findOrFail(params.role)
-    const transaction = await Database.beginGlobalTransaction()
-
-    try {
+  @bind()
+  public async destroy(_, role: Role) {
+    return transaction(async () => {
       await role.delete()
-      await transaction.commit()
 
-      return response.ok({
-        message: i18n.formatMessage('messages.role.deleted', {
+      return {
+        message: __('messages.role.deleted', {
           title: role.title,
         }),
         role,
-      })
-    } catch (e) {
-      await transaction.rollback()
-
-      return response.internalServerError({
-        message: `${e}`,
-      })
-    }
+      }
+    })
   }
 
-  public async togglePermission({ response, params, i18n }: HttpContextContract) {
-    const role = await Role.findOrFail(params.role)
-    const permission = await Permission.findOrFail(params.permission)
-    const transaction = await Database.beginGlobalTransaction()
-
-    try {
+  @bind()
+  public async togglePermission(_, role: Role, permission: Permission) {
+    return transaction(async () => {
       if (role.permissions.find((p) => p.key === permission.key)) {
         await role.related('permissions').detach([permission.id])
       } else {
         await role.related('permissions').attach([permission.id])
       }
 
-      await transaction.commit()
-
-      return response.ok({
-        message: i18n.formatMessage('messages.role.updated', {
+      return {
+        message: __('messages.role.updated', {
           title: role.title,
         }),
         role,
-      })
-    } catch (e) {
-      await transaction.rollback()
-
-      return response.internalServerError({
-        message: `${e}`,
-      })
-    }
+      }
+    })
   }
 }

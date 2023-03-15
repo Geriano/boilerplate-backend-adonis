@@ -1,7 +1,6 @@
 import { compose } from '@ioc:Adonis/Core/Helpers'
 import { SoftDeletes } from '@ioc:Adonis/Addons/LucidSoftDeletes'
 import { DateTime } from 'luxon'
-import Hash from '@ioc:Adonis/Core/Hash'
 import {
   column,
   beforeSave,
@@ -10,7 +9,9 @@ import {
   ManyToMany,
   beforeFind,
   ModelQueryBuilderContract,
+  beforeCreate,
 } from '@ioc:Adonis/Lucid/Orm'
+import Hash from '@ioc:Adonis/Core/Hash'
 import Permission from './Permission'
 import Role from './Role'
 
@@ -33,9 +34,7 @@ export default class User extends compose(BaseModel, SoftDeletes) {
   @column({ serializeAs: null })
   public password: string
 
-  @column({
-    serializeAs: null,
-  })
+  @column({ serializeAs: null })
   public rememberMeToken: string | null
 
   @column.dateTime()
@@ -64,6 +63,14 @@ export default class User extends compose(BaseModel, SoftDeletes) {
   public static async preloadPermissionsAndRoles(query: ModelQueryBuilderContract<typeof User>) {
     query.preload('permissions', (query) => query.select(['id', 'name', 'key']))
     query.preload('roles', (query) => query.select(['id', 'name', 'key']))
+  }
+
+  @beforeCreate()
+  @beforeSave()
+  public static async sanitize(user: User) {
+    user.name = user.name.toLowerCase()
+    user.email = user.email.toLowerCase()
+    user.username = user.username.toLowerCase()
   }
 
   public hasRole(roles: string | string[]) {

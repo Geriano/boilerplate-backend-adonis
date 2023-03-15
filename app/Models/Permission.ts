@@ -1,22 +1,22 @@
 import { DateTime } from 'luxon'
+import { __ } from 'App/helpers'
 import {
   BaseModel,
   ManyToMany,
   afterCreate,
+  beforeCreate,
+  beforeSave,
   column,
   computed,
   manyToMany,
 } from '@ioc:Adonis/Lucid/Orm'
-import HttpContext from '@ioc:Adonis/Core/HttpContext'
 import Role from './Role'
 
 export default class Permission extends BaseModel {
   @column({ isPrimary: true })
   public id: string
 
-  @column({
-    serializeAs: null,
-  })
+  @column({ serializeAs: null })
   public name: string | null
 
   @column({
@@ -28,10 +28,7 @@ export default class Permission extends BaseModel {
 
   @computed()
   public get title() {
-    const { i18n } = HttpContext.get()!
-    const title = this.name || this.key
-
-    return i18n.formatMessage(`messages.permission.value.${title}`)
+    return __(`messages.permission.value.${this.name || this.key}`)
   }
 
   @column.dateTime({
@@ -55,5 +52,12 @@ export default class Permission extends BaseModel {
     const superuser = await Role.findByOrFail('key', 'superuser')
 
     await superuser.related('permissions').attach([permission.id])
+  }
+
+  @beforeCreate()
+  @beforeSave()
+  public static async sanitize(permission: Permission) {
+    permission.name = permission.name?.toLowerCase() || null
+    permission.key = permission.key.toLowerCase()
   }
 }

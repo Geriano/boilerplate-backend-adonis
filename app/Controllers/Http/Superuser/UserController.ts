@@ -1,45 +1,37 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
-import Database from '@ioc:Adonis/Lucid/Database'
+import { DateTime } from 'luxon'
+import { __, response, send, transaction, validate } from 'App/helpers'
+import { bind } from '@adonisjs/route-model-binding'
 import User from 'App/Models/User'
 import Role from 'App/Models/Role'
 import Permission from 'App/Models/Permission'
-import { DateTime } from 'luxon'
 
 export default class UserController {
-  public async paginate({ request, response }: HttpContextContract) {
-    const { page, limit, search, order } = await request.validate({
-      schema: schema.create({
-        page: schema.number(),
-        limit: schema.number(),
-        search: schema.string.optional(),
-        order: schema.object().members({
-          dir: schema.enum(['asc', 'desc']),
-          key: schema.enum(['name', 'email', 'username']),
-        }),
+  public async index() {
+    const { page, limit, search, order } = await validate({
+      page: schema.number(),
+      limit: schema.number(),
+      search: schema.string.optional(),
+      order: schema.object().members({
+        dir: schema.enum(['asc', 'desc']),
+        key: schema.enum(['name', 'email', 'username']),
       }),
     })
 
-    try {
-      return response.ok(
-        await User.query()
-          .where((query) => {
-            const s = `%${search || ''}%`
-            query.orWhereILike('name', s).orWhereILike('email', s).orWhereILike('username', s)
-          })
-          .orderBy(order.key, order.dir as 'asc' | 'desc')
-          .preload('permissions', (query) => query.select(['id', 'name', 'key']))
-          .preload('roles', (query) => query.select(['id', 'name', 'key']))
-          .paginate(page, limit)
-      )
-    } catch (e) {
-      return response.internalServerError({
-        message: `${e}`,
-      })
-    }
+    return send(
+      User.query()
+        .where((query) => {
+          const s = `%${search || ''}%`
+          query.orWhereILike('name', s).orWhereILike('email', s).orWhereILike('username', s)
+        })
+        .orderBy(order.key, order.dir as 'asc' | 'desc')
+        .preload('permissions', (query) => query.select(['id', 'name', 'key']))
+        .preload('roles', (query) => query.select(['id', 'name', 'key']))
+        .paginate(page, limit)
+    )
   }
 
-  private async validate(request: HttpContextContract['request'], update: User | null = null) {
+  private async validate(update?: User) {
     const option = { trim: true }
     const email = [
       rules.unique({
@@ -69,44 +61,40 @@ export default class UserController {
       rules.minLength(2),
       rules.maxLength(64),
     ]
-    const password = [rules.minLength(8), rules.maxLength(255), rules.alphaNum()]
+    const password = [rules.minLength(8), rules.maxLength(255), rules.trim()]
     const passwordConfirmation = [rules.confirmed('password')]
 
-    return await request.validate({
-      schema: schema.create({
-        name: schema.string(option),
-        email: schema.string(option, email),
-        username: schema.string(option, username),
-        password: update ? schema.string.optional(password) : schema.string(option, password),
-        password_confirmation: update
-          ? schema.string.optional(passwordConfirmation)
-          : schema.string(option, passwordConfirmation),
-        permissions: schema.array.optional().members(
-          schema.string([
-            rules.exists({
-              table: Permission.table,
-              column: 'key',
-            }),
-          ])
-        ),
-        roles: schema.array.optional().members(
-          schema.string([
-            rules.exists({
-              table: Role.table,
-              column: 'key',
-            }),
-          ])
-        ),
-      }),
+    return await validate({
+      name: schema.string(option),
+      email: schema.string(option, email),
+      username: schema.string(option, username),
+      password: update ? schema.string.optional(password) : schema.string(option, password),
+      password_confirmation: update
+        ? schema.string.optional(passwordConfirmation)
+        : schema.string(option, passwordConfirmation),
+      permissions: schema.array.optional().members(
+        schema.string([
+          rules.exists({
+            table: Permission.table,
+            column: 'key',
+          }),
+        ])
+      ),
+      roles: schema.array.optional().members(
+        schema.string([
+          rules.exists({
+            table: Role.table,
+            column: 'key',
+          }),
+        ])
+      ),
     })
   }
 
-  public async store({ request, response, i18n }: HttpContextContract) {
-    const { name, email, username, password, roles, permissions } = await this.validate(request)
+  public async store() {
+    const { name, email, username, password, roles, permissions } = await this.validate()
 
-    const transaction = await Database.beginGlobalTransaction()
-
-    try {
+    return transaction(async () => {
       const user = await User.create({
         name,
         email,
@@ -131,36 +119,31 @@ export default class UserController {
         )
       }
 
-      await transaction.commit()
       await user.load('permissions')
       await user.load('roles')
 
-      return response.created({
-        message: i18n.formatMessage('messages.user.created', {
+      return response().created({
+        message: __('messages.user.created', {
           title: user.name,
         }),
         user,
       })
-    } catch (e) {
-      await transaction.rollback()
-
-      return response.internalServerError({
-        message: `${e}`,
-      })
-    }
+    })
   }
 
-  public async show({ response, params }: HttpContextContract) {
-    return response.ok(await User.findOrFail(params.user))
+  @bind()
+  public async show(_, user: User) {
+    await user.load('permissions')
+    await user.load('roles')
+
+    return user
   }
 
-  public async update({ request, response, params, i18n }: HttpContextContract) {
-    const user = await User.findOrFail(params.user)
-    const { name, email, username, roles, permissions } = await this.validate(request, user)
+  @bind()
+  public async update(_, user: User) {
+    const { name, email, username, roles, permissions } = await this.validate(user)
 
-    const transaction = await Database.beginGlobalTransaction()
-
-    try {
+    return transaction(async () => {
       user.name = name
       user.email = email
       user.username = username
@@ -182,135 +165,84 @@ export default class UserController {
         )
       }
 
-      await transaction.commit()
       await user.load('permissions')
       await user.load('roles')
 
-      return response.ok({
-        message: i18n.formatMessage('messages.user.updated', {
+      return {
+        message: __('messages.user.updated', {
           title: user.name,
         }),
         user,
-      })
-    } catch (e) {
-      await transaction.rollback()
-
-      return response.internalServerError({
-        message: `${e}`,
-      })
-    }
+      }
+    })
   }
 
-  public async updatePassword({ request, response, params, i18n }: HttpContextContract) {
-    const user = await User.findOrFail(params.user)
-    const { password } = await request.validate({
-      schema: schema.create({
-        password: schema.string({ trim: true }, [
-          rules.minLength(8),
-          rules.maxLength(255),
-          rules.alphaNum(),
-        ]),
-        password_confirmation: schema.string({ trim: true }, [rules.confirmed('password')]),
-      }),
+  @bind()
+  public async updatePassword(_, user: User) {
+    const { password } = await validate({
+      password: schema.string({ trim: true }, [
+        rules.minLength(8),
+        rules.maxLength(255),
+        rules.trim(),
+      ]),
+      password_confirmation: schema.string({ trim: true }, [rules.confirmed('password')]),
     })
 
-    const transaction = await Database.beginGlobalTransaction()
-
-    try {
+    return transaction(async () => {
       user.password = password
       await user.save()
-      await transaction.commit()
 
-      return response.ok({
-        message: i18n.formatMessage('messages.user.password updated'),
-      })
-    } catch (e) {
-      await transaction.rollback()
-
-      return response.internalServerError({
-        message: `${e}`,
-      })
-    }
+      return {
+        message: __('messages.user.password updated'),
+      }
+    })
   }
 
-  public async destroy({ response, params, i18n }: HttpContextContract) {
-    const user = await User.findOrFail(params.user)
-    const transaction = await Database.beginGlobalTransaction()
-
-    try {
+  @bind()
+  public async destroy(_, user: User) {
+    return transaction(async () => {
       await user.delete()
-      await transaction.commit()
 
-      return response.ok({
-        message: i18n.formatMessage('messages.user.deleted', {
+      return {
+        message: __('messages.user.deleted', {
           title: user.name,
         }),
         user,
-      })
-    } catch (e) {
-      await transaction.rollback()
-
-      return response.internalServerError({
-        message: `${e}`,
-      })
-    }
+      }
+    })
   }
 
-  public async togglePermission({ response, params, i18n }: HttpContextContract) {
-    const user = await User.findOrFail(params.user)
-    const permission = await Permission.findOrFail(params.permission)
-    const transaction = await Database.beginGlobalTransaction()
-
-    try {
+  @bind()
+  public async togglePermission(_, user: User, permission: Permission) {
+    return transaction(async () => {
       if (user.permissions.find((p) => permission.id === p.id)) {
         await user.related('permissions').detach([permission.id])
       } else {
         await user.related('permissions').attach([permission.id])
       }
 
-      await transaction.commit()
-
-      return response.ok({
-        message: i18n.formatMessage('messages.user.updated', {
+      return {
+        message: __('messages.user.updated', {
           title: user.name,
         }),
-        user,
-      })
-    } catch (e) {
-      await transaction.rollback()
-
-      return response.internalServerError({
-        message: `${e}`,
-      })
-    }
+      }
+    })
   }
 
-  public async toggleRole({ response, params, i18n }: HttpContextContract) {
-    const user = await User.findOrFail(params.user)
-    const role = await Role.findOrFail(params.role)
-    const transaction = await Database.beginGlobalTransaction()
-
-    try {
+  @bind()
+  public async toggleRole(_, user: User, role: Role) {
+    return transaction(async () => {
       if (user.roles.find((r) => role.id === r.id)) {
         await user.related('roles').detach([role.id])
       } else {
         await user.related('roles').attach([role.id])
       }
 
-      await transaction.commit()
-
-      return response.ok({
-        message: i18n.formatMessage('messages.user.updated', {
+      return {
+        message: __('messages.user.updated', {
           title: user.name,
         }),
-        user,
-      })
-    } catch (e) {
-      await transaction.rollback()
-
-      return response.internalServerError({
-        message: `${e}`,
-      })
-    }
+      }
+    })
   }
 }

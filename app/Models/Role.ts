@@ -1,24 +1,24 @@
 import { DateTime } from 'luxon'
+import { __ } from 'App/helpers'
 import {
   BaseModel,
   ManyToMany,
   ModelQueryBuilderContract,
+  beforeCreate,
   beforeFetch,
   beforeFind,
+  beforeSave,
   column,
   computed,
   manyToMany,
 } from '@ioc:Adonis/Lucid/Orm'
 import Permission from './Permission'
-import { HttpContext } from '@adonisjs/core/build/standalone'
 
 export default class Role extends BaseModel {
   @column({ isPrimary: true })
   public id: string
 
-  @column({
-    serializeAs: null,
-  })
+  @column({ serializeAs: null })
   public name: string | null
 
   @column({
@@ -30,10 +30,7 @@ export default class Role extends BaseModel {
 
   @computed()
   public get title() {
-    const { i18n } = HttpContext.get()!
-    const title = this.name || this.key
-
-    return i18n.formatMessage(`messages.role.value.${title}`)
+    return __(`messages.role.value.${this.name || this.key}`)
   }
 
   @column.dateTime({
@@ -60,6 +57,13 @@ export default class Role extends BaseModel {
   @beforeFind()
   public static async findPermissions(query: ModelQueryBuilderContract<typeof Role>) {
     query.preload('permissions')
+  }
+
+  @beforeCreate()
+  @beforeSave()
+  public static async sanitize(role: Role) {
+    role.name = role.name?.toLowerCase() || null
+    role.key = role.key.toLowerCase()
   }
 
   public hasPermission(permissions: string | string[]) {
