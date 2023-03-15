@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable prettier/prettier */
-import { HttpContext, Response } from '@adonisjs/core/build/standalone'
+import { HttpContext } from '@adonisjs/core/build/standalone'
 import { CastableHeader } from '@ioc:Adonis/Core/Response'
 import { TypedSchema, schema } from '@ioc:Adonis/Core/Validator'
 import Database from '@ioc:Adonis/Lucid/Database'
@@ -13,10 +13,10 @@ export const request = () => context().request
 export const response = () => context().response
 
 export async function send<T>(body: T, code: number = 200, headers: Record<string, CastableHeader> = {}) {
-  if (body instanceof Response) {
-    return body
+  if (!body) {
+    return
   }
-
+  
   const builder = response()
 
   for (const key in headers) {
@@ -27,7 +27,7 @@ export async function send<T>(body: T, code: number = 200, headers: Record<strin
     try {
       return send(await body, code, headers)
     } catch (e) {
-      return send({ message: e.message }, 500, headers)
+      return send({ message: e.message, ...JSON.parse(JSON.stringify(e)) }, 500, headers)
     }
   } else if (typeof body === 'function') {
     return send(body(), code)
