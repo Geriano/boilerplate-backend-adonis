@@ -1,45 +1,21 @@
-name: 'boilerplate-backend'
+name: 'boilerplate-production'
 version: '3.1'
 services:
   database:
-    container_name: database
     image: postgres
     environment:
+      TZ: Asia/Jakarta
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
-      POSTGRES_DB: boilerplate_node
+      POSTGRES_DB: boilerplate
     ports:
       - 5432:5432
   app:
-    container_name: app
     depends_on:
       - database
     build: .
-    command: node ace serve --watch
     env_file:
       - .env
-    environment:
-      PG_HOST: host.docker.internal
-      PG_USER: root
-      PG_PASSWORD: root
-      PG_DB_NAME: boilerplate_node
     ports:
       - 3333:3333
-    volumes:
-      - ./app:/app/app
-      - ./commands:/app/commands
-      - ./config:/app/config
-      - ./contracts:/app/contracts
-      - ./database:/app/database
-      - ./providers:/app/providers
-      - ./resources:/app/resources
-      - ./start:/app/start
-      - ./tests:/app/tests
-      - ./tmp:/app/tmp
-      - ./.adonisrc.json:/app/.adonisrc.json
-      - ./.env:/app/.env
-      - ./ace-manifest.json:/app/ace-manifest.json
-      - ./env.ts:/app/env.ts
-      - ./package.json:/app/package.json
-      - ./server.ts:/app/server.ts
-      - ./test.ts:/app/test.ts
+    entrypoint: node ace migration:fresh --seed
