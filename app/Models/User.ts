@@ -15,6 +15,42 @@ import Hash from '@ioc:Adonis/Core/Hash'
 import Permission from './Permission'
 import Role from './Role'
 
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *    User:
+ *      type: object
+ *      properties:
+ *        id:
+ *          type: uuid
+ *          example: 46363e02-4c62-4482-a47d-0d08035824d8
+ *        name:
+ *          type: string
+ *          example: root
+ *        profile_photo_path:
+ *          type: string
+ *          nullable: true
+ *          example: null
+ *        email:
+ *          type: string
+ *          example: root@local
+ *        username:
+ *          type: string
+ *          example: root
+ *        email_verified_at:
+ *          type: date-time
+ *          nullable: true
+ *          example: 2023-06-17 14:36:02
+ *        permissions:
+ *          type: array
+ *          items:
+ *            $ref: '#/components/schemas/Permission'
+ *        roles:
+ *          type: array
+ *          items:
+ *            $ref: '#/components/schemas/Role'
+ */
 export default class User extends compose(BaseModel, SoftDeletes) {
   @column({ isPrimary: true })
   public id: string

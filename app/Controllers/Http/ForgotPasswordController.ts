@@ -8,6 +8,58 @@ import Database from '@ioc:Adonis/Lucid/Database'
 import Mail from '@ioc:Adonis/Addons/Mail'
 
 export default class ForgotPasswordController {
+  /**
+   * @swagger
+   * /forgot-password:
+   *  post:
+   *    summary: Request reset password
+   *    tags:
+   *      - Authentication
+   *    security:
+   *      - csrf: []
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: payload
+   *        in: body
+   *        required: true
+   *        schema:
+   *          type: object
+   *          properties:
+   *            email:
+   *              type: string
+   *              example: root@local.app
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      419:
+   *        description: PageExpired
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PageExpired'
+   *      422:
+   *        description: Unprocessable Entity
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: array
+   *              items:
+   *                $ref: '#/components/schemas/ValidationError'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async request({ request, response, i18n }: HttpContextContract) {
     const { email, next } = await request.validate({
       schema: schema.create({
@@ -48,6 +100,61 @@ export default class ForgotPasswordController {
     })
   }
 
+  /**
+   * @swagger
+   * /forgot-password:
+   *  put:
+   *    summary: Reset password
+   *    security:
+   *      - csrf: []
+   *    tags:
+   *      - Authentication
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: payload
+   *        in: body
+   *        required: true
+   *        schema:
+   *          type: object
+   *          properties:
+   *            password:
+   *              type: string
+   *              example: password
+   *            password_confirmation:
+   *              type: string
+   *              example: password
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      419:
+   *        description: PageExpired
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PageExpired'
+   *      422:
+   *        description: Unprocessable Entity
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: array
+   *              items:
+   *                $ref: '#/components/schemas/ValidationError'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async reset({ request, response, i18n }: HttpContextContract) {
     const option = { trim: true }
     const { token, password } = await request.validate({

@@ -6,6 +6,30 @@ import { readdir } from 'fs/promises'
 type Recursive = Record<string, Record<string, Record<string, string> | string> | string>
 
 export default class TranslationController {
+  /**
+   * @swagger
+   * /translation:
+   *  get:
+   *    summary: Get available translation
+   *    tags:
+   *      - Translation
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: array
+   *              items:
+   *                type: string
+   *                example: en
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async index({ response }: HttpContextContract) {
     try {
       const disks = await readdir(Application.resourcesPath('/lang'), { withFileTypes: true })
@@ -18,6 +42,35 @@ export default class TranslationController {
     }
   }
 
+  /**
+   * @swagger
+   * /translation/{lang}:
+   *  get:
+   *    summary: Get list available translation by language
+   *    tags:
+   *      - Translation
+   *    parameters:
+   *      - name: lang
+   *        in: path
+   *        required: true
+   *        description: Language
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: array
+   *              items:
+   *                type: string
+   *                example: messages
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async list({ response, params }: HttpContextContract) {
     try {
       const { id } = params
@@ -41,6 +94,40 @@ export default class TranslationController {
     }
   }
 
+  /**
+   * @swagger
+   * /translation/{lang}/{list}:
+   *  get:
+   *    summary: Get available translation in list
+   *    tags:
+   *      - Translation
+   *    parameters:
+   *      - name: lang
+   *        in: path
+   *        required: true
+   *        description: Language
+   *      - name: list
+   *        in: path
+   *        required: true
+   *        description: List name
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                key:
+   *                  type: string
+   *                  example: value
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async show({ response, params }: HttpContextContract) {
     try {
       const { id, name } = params
@@ -60,6 +147,52 @@ export default class TranslationController {
     }
   }
 
+  /**
+   * @swagger
+   * /translation/{lang}/{list}:
+   *  put:
+   *    summary: Update translation value
+   *    tags:
+   *      - Translation
+   *    security:
+   *      - csrf: []
+   *    parameters:
+   *      - name: lang
+   *        in: path
+   *        required: true
+   *        description: Language
+   *      - name: list
+   *        in: path
+   *        required: true
+   *        description: List name
+   *    requestBody:
+   *      required: true
+   *      content:
+   *        multipart/form-data:
+   *          schema:
+   *            type: object
+   *            properties:
+   *              key:
+   *                type: string
+   *                example: value
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                key:
+   *                  type: string
+   *                  example: value
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async update({ request, response, params }: HttpContextContract) {
     const body = request.body() as Recursive
     const { id, name } = params

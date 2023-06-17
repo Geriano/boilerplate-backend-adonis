@@ -5,6 +5,32 @@ import { DateTime } from 'luxon'
 import { HttpContext } from '@adonisjs/core/build/standalone'
 
 export default class CsrfTokenController {
+  /**
+   * @swagger
+   * /csrf:
+   *  post:
+   *    summary: Generate csrf token
+   *    tags:
+   *      - CSRF
+   *    produces:
+   *      - application/json
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                token:
+   *                  type: string
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async generate({ request, response }: HttpContextContract) {
     await CsrfToken.query()
       .where('ip', request.ip())

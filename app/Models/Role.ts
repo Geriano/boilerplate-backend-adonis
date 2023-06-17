@@ -14,6 +14,27 @@ import {
 } from '@ioc:Adonis/Lucid/Orm'
 import Permission from './Permission'
 
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *    Role:
+ *      type: object
+ *      properties:
+ *        id:
+ *          type: string
+ *          example: c6fc42c9-fe5c-4894-a8e7-7da3e3e8d54b
+ *        name:
+ *          type: string
+ *          example: developer
+ *        key:
+ *          type: string
+ *          example: developer
+ *        permissions:
+ *          type: array
+ *          items:
+ *            $ref: '#/components/schemas/Permission'
+ */
 export default class Role extends BaseModel {
   @column({ isPrimary: true })
   public id: string

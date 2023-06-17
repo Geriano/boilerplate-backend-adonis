@@ -7,6 +7,64 @@ import Role from 'App/Models/Role'
 import Permission from 'App/Models/Permission'
 
 export default class UserController {
+  /**
+   * @swagger
+   * /superuser/user:
+   *  get:
+   *    summary: User pagination
+   *    tags:
+   *      - Master User
+   *    security:
+   *      - token: []
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: page
+   *        in: query
+   *        required: true
+   *        example: 1
+   *      - name: limit
+   *        in: query
+   *        required: true
+   *        example: 10
+   *      - name: search
+   *        in: query
+   *        required: false
+   *      - name: order[dir]
+   *        in: query
+   *        required: true
+   *        example: asc
+   *      - name: order[key]
+   *        in: query
+   *        required: true
+   *        example: name
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                meta:
+   *                  $ref: '#/components/schemas/PaginationMetaSchema'
+   *                data:
+   *                  type: array
+   *                  items:
+   *                    $ref: '#/components/schemas/User'
+   *      401:
+   *        description: Unauthorized
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/Unauthorized'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async index() {
     const { page, limit, search, order } = await validate({
       page: schema.number(),
@@ -31,6 +89,60 @@ export default class UserController {
     )
   }
 
+  /**
+   * @swagger
+   * components:
+   *  schemas:
+   *    UserCreatePayload:
+   *      type: object
+   *      properties:
+   *        name:
+   *          type: string
+   *          example: John
+   *          required: true
+   *        email:
+   *          type: string
+   *          example: john@local.app
+   *          required: true
+   *        username:
+   *          type: string
+   *          example: john
+   *          required: true
+   *        password:
+   *          type: string
+   *          example: password
+   *          required: true
+   *        password_confirmation:
+   *          type: string
+   *          example: John
+   *          required: true
+   *    UserUpdatePayload:
+   *      type: object
+   *      properties:
+   *        name:
+   *          type: string
+   *          example: John
+   *          required: true
+   *        email:
+   *          type: string
+   *          example: john@local.app
+   *          required: true
+   *        username:
+   *          type: string
+   *          example: john
+   *          required: true
+   *    UserPasswordPayload:
+   *      type: object
+   *      properties:
+   *        password:
+   *          type: string
+   *          example: password
+   *          required: true
+   *        password_confirmation:
+   *          type: string
+   *          example: password
+   *          required: true
+   */
   private async validate(update?: User) {
     const option = { trim: true }
     const email = [
@@ -91,6 +203,63 @@ export default class UserController {
     })
   }
 
+  /**
+   * @swagger
+   * /superuser/user:
+   *  post:
+   *    summary: Create user
+   *    tags:
+   *      - Master User
+   *    security:
+   *      - token: []
+   *      - csrf: []
+   *    produces:
+   *      - application/json
+   *    requestBody:
+   *      required: true
+   *      content:
+   *        multipart/form-data:
+   *          schema:
+   *            $ref: '#/components/schemas/UserCreatePayload'
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *                user:
+   *                  $ref: '#/components/schemas/User'
+   *      401:
+   *        description: Unauthorized
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/Unauthorized'
+   *      419:
+   *        description: PageExpired
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PageExpired'
+   *      422:
+   *        description: Unprocessable Entity
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: array
+   *              items:
+   *                $ref: '#/components/schemas/ValidationError'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async store() {
     const { name, email, username, password, roles, permissions } = await this.validate()
 
@@ -131,6 +300,49 @@ export default class UserController {
     })
   }
 
+  /**
+   * @swagger
+   * /superuser/user/{id}:
+   *  get:
+   *    summary: Show user by id
+   *    tags:
+   *      - Master User
+   *    security:
+   *      - token: []
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: id
+   *        in: path
+   *        required: true
+   *        description: User id
+   *        example: 46363e02-4c62-4482-a47d-0d08035824d8
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/User'
+   *      401:
+   *        description: Unauthorized
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/Unauthorized'
+   *      404:
+   *        description: Not Found
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/NotFound'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   @bind()
   public async show(_, user: User) {
     await user.load('permissions')
@@ -139,6 +351,75 @@ export default class UserController {
     return user
   }
 
+  /**
+   * @swagger
+   * /superuser/user/{id}:
+   *  put:
+   *    summary: Update user general information by id
+   *    tags:
+   *      - Master User
+   *    security:
+   *      - token: []
+   *      - csrf: []
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: id
+   *        in: path
+   *        required: true
+   *        description: User id
+   *        example: 46363e02-4c62-4482-a47d-0d08035824d8
+   *    requestBody:
+   *      required: true
+   *      content:
+   *        multipart/form-data:
+   *          schema:
+   *            $ref: '#/components/schemas/UserUpdatePayload'
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *                user:
+   *                  $ref: '#/components/schemas/User'
+   *      401:
+   *        description: Unauthorized
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/Unauthorized'
+   *      404:
+   *        description: Not Found
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/NotFound'
+   *      419:
+   *        description: PageExpired
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PageExpired'
+   *      422:
+   *        description: Unprocessable Entity
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: array
+   *              items:
+   *                $ref: '#/components/schemas/ValidationError'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   @bind()
   public async update(_, user: User) {
     const { name, email, username, roles, permissions } = await this.validate(user)
@@ -177,6 +458,73 @@ export default class UserController {
     })
   }
 
+  /**
+   * @swagger
+   * /superuser/user/{id}/password:
+   *  put:
+   *    summary: Update user password by id
+   *    tags:
+   *      - Master User
+   *    security:
+   *      - token: []
+   *      - csrf: []
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: id
+   *        in: path
+   *        required: true
+   *        description: User id
+   *        example: 46363e02-4c62-4482-a47d-0d08035824d8
+   *    requestBody:
+   *      required: true
+   *      content:
+   *        multipart/form-data:
+   *          schema:
+   *            $ref: '#/components/schemas/UserPasswordPayload'
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Unauthorized
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/Unauthorized'
+   *      404:
+   *        description: Not Found
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/NotFound'
+   *      419:
+   *        description: PageExpired
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PageExpired'
+   *      422:
+   *        description: Unprocessable Entity
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: array
+   *              items:
+   *                $ref: '#/components/schemas/ValidationError'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   @bind()
   public async updatePassword(_, user: User) {
     const { password } = await validate({
@@ -198,6 +546,55 @@ export default class UserController {
     })
   }
 
+  /**
+   * @swagger
+   * /superuser/user/{id}:
+   *  delete:
+   *    summary: Delete user by id
+   *    tags:
+   *      - Master User
+   *    security:
+   *      - token: []
+   *      - csrf: []
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: id
+   *        in: path
+   *        required: true
+   *        description: User id
+   *        example: 46363e02-4c62-4482-a47d-0d08035824d8
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *                user:
+   *                  $ref: '#/components/schemas/User'
+   *      401:
+   *        description: Unauthorized
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/Unauthorized'
+   *      419:
+   *        description: PageExpired
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PageExpired'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   @bind()
   public async destroy(_, user: User) {
     return transaction(async () => {
@@ -212,6 +609,58 @@ export default class UserController {
     })
   }
 
+  /**
+   * @swagger
+   * /superuser/user/{id}/permission/{permission}:
+   *  put:
+   *    summary: Toggler user permission
+   *    tags:
+   *      - Master User
+   *    security:
+   *      - token: []
+   *      - csrf: []
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: id
+   *        in: path
+   *        required: true
+   *        description: User id
+   *        example: 46363e02-4c62-4482-a47d-0d08035824d8
+   *      - name: permission
+   *        in: path
+   *        required: true
+   *        description: Permission id
+   *        example: 46363e02-4c62-4482-a47d-0d08035824d8
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Unauthorized
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/Unauthorized'
+   *      419:
+   *        description: PageExpired
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PageExpired'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   @bind()
   public async togglePermission(_, user: User, permission: Permission) {
     return transaction(async () => {
@@ -229,6 +678,58 @@ export default class UserController {
     })
   }
 
+  /**
+   * @swagger
+   * /superuser/user/{id}/role/{role}:
+   *  put:
+   *    summary: Toggler user role
+   *    tags:
+   *      - Master User
+   *    security:
+   *      - token: []
+   *      - csrf: []
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: id
+   *        in: path
+   *        required: true
+   *        description: User id
+   *        example: 46363e02-4c62-4482-a47d-0d08035824d8
+   *      - name: role
+   *        in: path
+   *        required: true
+   *        description: Role id
+   *        example: 46363e02-4c62-4482-a47d-0d08035824d8
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Unauthorized
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/Unauthorized'
+   *      419:
+   *        description: PageExpired
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PageExpired'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   @bind()
   public async toggleRole(_, user: User, role: Role) {
     return transaction(async () => {

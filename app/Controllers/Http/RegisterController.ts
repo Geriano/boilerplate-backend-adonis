@@ -9,6 +9,75 @@ import User from 'App/Models/User'
 import { DateTime } from 'luxon'
 
 export default class RegisterController {
+  /**
+   * @swagger
+   * /register:
+   *  post:
+   *    summary: Register
+   *    security:
+   *      - csrf: []
+   *    tags:
+   *      - Authentication
+   *    requestBody:
+   *      required: true
+   *      content:
+   *        multipart/form-data:
+   *          schema:
+   *            type: object
+   *            properties:
+   *              name:
+   *                type: string
+   *                required: true
+   *                example: root
+   *              email:
+   *                type: string
+   *                required: true
+   *                example: root
+   *              username:
+   *                type: string
+   *                required: true
+   *                example: root
+   *              password:
+   *                type: string
+   *                required: true
+   *                example: password
+   *              password_confirmation:
+   *                type: string
+   *                required: true
+   *                example: password
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *                user:
+   *                  $ref: '#/components/schemas/User'
+   *      419:
+   *        description: PageExpired
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PageExpired'
+   *      422:
+   *        description: Unprocessable Entity
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: array
+   *              items:
+   *                $ref: '#/components/schemas/ValidationError'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async process({ request, response, i18n }: HttpContextContract) {
     const option = { trim: true }
     const { name, email, username, password, next } = await request.validate({
@@ -97,6 +166,50 @@ export default class RegisterController {
     })
   }
 
+  /**
+   * @swagger
+   * /verify:
+   *  get:
+   *    summary: Verify user email
+   *    tags:
+   *      - Authentication
+   *    security:
+   *      - csrf: []
+   *    parameters:
+   *      - name: token
+   *        in: query
+   *        required: true
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      419:
+   *        description: PageExpired
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PageExpired'
+   *      422:
+   *        description: Unprocessable Entity
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: array
+   *              items:
+   *                $ref: '#/components/schemas/ValidationError'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async verify({ request, response, i18n }: HttpContextContract) {
     const { token } = request.qs() as {
       token: string

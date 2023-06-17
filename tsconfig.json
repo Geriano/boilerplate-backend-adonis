@@ -34,7 +34,8 @@
       "@adonisjs/route-model-binding/build/adonis-typings",
       "adonis-lucid-soft-deletes",
       "@adonisjs/i18n",
-      "@adonisjs/mail"
+      "@adonisjs/mail",
+      "adonis5-swagger"
     ]
   }
 }

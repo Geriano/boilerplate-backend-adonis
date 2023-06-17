@@ -5,6 +5,74 @@ import Hash from '@ioc:Adonis/Core/Hash'
 import User from 'App/Models/User'
 
 export default class LoginController {
+  /**
+   * @swagger
+   * /login:
+   *  post:
+   *    summary: Login
+   *    security:
+   *      - csrf: []
+   *    tags:
+   *      - Authentication
+   *    produces:
+   *      - application/json
+   *    requestBody:
+   *      required: true
+   *      content:
+   *        multipart/form-data:
+   *          schema:
+   *            type: object
+   *            properties:
+   *              username:
+   *                type: string
+   *                required: true
+   *                example: root
+   *              password:
+   *                type: string
+   *                required: true
+   *                example: password
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *                type:
+   *                  type: string
+   *                token:
+   *                  type: string
+   *                expires_at:
+   *                  type: string
+   *                  example: 2023-06-17 17:39:00
+   *                expires_in:
+   *                  type: string
+   *                user:
+   *                  $ref: '#/components/schemas/User'
+   *        419:
+   *          description: PageExpired
+   *          content:
+   *            application/json:
+   *              schema:
+   *                $ref: '#/components/schemas/PageExpired'
+   *        422:
+   *          description: Unprocessable Entity
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/ValidationError'
+   *        500:
+   *          description: Internal Server Error
+   *          content:
+   *            application/json:
+   *              schema:
+   *                $ref: '#/components/schemas/InternalServerError'
+   */
   public async process({ auth, i18n, request, response }: HttpContextContract) {
     const option = { trim: true }
     const { username, password } = await request.validate({

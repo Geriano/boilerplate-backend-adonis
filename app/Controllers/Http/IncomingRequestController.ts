@@ -3,6 +3,64 @@ import Database from '@ioc:Adonis/Lucid/Database'
 import IncomingRequest from 'App/Models/IncomingRequest'
 
 export default class IncomingRequestController {
+  /**
+   * @swagger
+   * /incoming-request/average:
+   *  get:
+   *    summary: Average time every incoming request
+   *    tags:
+   *      - Health Check
+   *    produces:
+   *      - application/json
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: array
+   *              items:
+   *                type: object
+   *                properties:
+   *                  name:
+   *                    type: string
+   *                    example: /user
+   *                  method:
+   *                    type: string
+   *                    example: POST
+   *                  average:
+   *                    type: number
+   *                    example: 100
+   *                  min:
+   *                    type: number
+   *                    example: 100
+   *                  max:
+   *                    type: number
+   *                    example: 100
+   *                  count:
+   *                    type: number
+   *                    example: 100
+   *      419:
+   *        description: PageExpired
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PageExpired'
+   *      422:
+   *        description: Unprocessable Entity
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: array
+   *              items:
+   *                $ref: '#/components/schemas/ValidationError'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async average({ response }: HttpContextContract) {
     const count = Database.query()
       .select([Database.raw('count(*)')])

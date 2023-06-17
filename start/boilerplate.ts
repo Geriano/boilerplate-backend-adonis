@@ -50,3 +50,7 @@ Route.get('/verify', 'RegisterController.verify').as('verify')
 Route.post('/forgot-password', 'ForgotPasswordController.request').as('forgot.password.request')
 Route.put('/forgot-password', 'ForgotpasswordController.reset').as('forgot.password.reset')
 Route.post('/csrf', 'CsrfTokenController.generate').as('csrf')
+
+Route.resource('file', 'FileController').apiOnly()
+Route.put('/file/:file/restore', 'FileController.restore')
+Route.delete('/file/:file/force', 'FileController.force')
