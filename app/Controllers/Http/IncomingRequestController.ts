@@ -15,7 +15,7 @@ export default class IncomingRequestController {
       .select([
         'name',
         'method',
-        Database.raw(`sum(time) / (${count}) average`),
+        Database.raw(`case when (${count}) > 0 then (sum(time) / (${count})) else 0 end average`),
         Database.raw(`min(time) min`),
         Database.raw(`max(time) max`),
         Database.raw(`(${count}) count`),
