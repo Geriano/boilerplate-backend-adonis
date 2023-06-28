@@ -49,6 +49,8 @@ export async function transaction<T extends () => Promise<any>>(callback: T, cod
 
     return send(result, code)
   } catch (e) {
+    await transaction.rollback()
+    
     return send({
       message: e.message,
     }, 500)
