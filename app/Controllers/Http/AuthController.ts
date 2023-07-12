@@ -12,6 +12,38 @@ import User from 'App/Models/User'
 import RegisterController from './RegisterController'
 
 export default class AuthController {
+  /**
+   * @swagger
+   * /auth/user:
+   *  get:
+   *    summary: Get current authenticated user
+   *    tags:
+   *      - Authentication
+   *    security:
+   *      - token: []
+   *      - csrf: []
+   *    produces:
+   *      - application/json
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/User'
+   *      401:
+   *        description: Unauthorized
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/Unauthorized'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async user({ auth, response }: HttpContextContract) {
     const user = auth.user!
 
@@ -69,6 +101,63 @@ export default class AuthController {
     return response.status(401)
   }
 
+  /**
+   * @swagger
+   * /auth/user:
+   *  put:
+   *    summary: Update current user profile information
+   *    tags:
+   *      - Authentication
+   *    security:
+   *      - token: []
+   *      - csrf: []
+   *    produces:
+   *      - application/json
+   *    requestBody:
+   *      required: true
+   *      content:
+   *        multipart/form-data:
+   *          schema:
+   *            type: object
+   *            properties:
+   *              name:
+   *                type: string
+   *                required: true
+   *                example: Ger
+   *              email:
+   *                type: string
+   *                required: true
+   *                example: ger@local.app
+   *              next:
+   *                type: string
+   *                required: false
+   *                example: http://localhost:3333/next
+   *              photo:
+   *                type: file
+   *                required: false
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Unauthorized
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/Unauthorized'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async updateProfileInformation({ auth, request, response, i18n }: HttpContextContract) {
     const user = auth.user!
     const option = { trim: true }
@@ -103,7 +192,7 @@ export default class AuthController {
           }),
           rules.requiredWhen('email', '!=', user.email),
         ]),
-        photo: schema.file({
+        photo: schema.file.nullableAndOptional({
           extnames: ['png', 'jpg', 'jpeg', 'webp'],
         }),
       }),
@@ -122,7 +211,7 @@ export default class AuthController {
       user.username = username
       user.email = email
 
-      if (photo && photo.isValid) {
+      if (photo?.isValid) {
         if (user.profilePhotoPath) {
           const path = Application.publicPath(user.profilePhotoPath)
           existsSync(path) && unlinkSync(path)
@@ -157,6 +246,41 @@ export default class AuthController {
     }
   }
 
+  /**
+   * @swagger
+   * /auth/user:
+   *  delete:
+   *    summary: Remove current user profile photo
+   *    tags:
+   *      - Authentication
+   *    security:
+   *      - token: []
+   *      - csrf: []
+   *    produces:
+   *      - application/json
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Unauthorized
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/Unauthorized'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async removeProfilePhoto({ auth, response, i18n }: HttpContextContract) {
     const user = auth.user!
 
@@ -188,6 +312,60 @@ export default class AuthController {
     })
   }
 
+  /**
+   * @swagger
+   * /auth/user:
+   *  patch:
+   *    summary: Update current user password
+   *    tags:
+   *      - Authentication
+   *    security:
+   *      - token: []
+   *      - csrf: []
+   *    produces:
+   *      - application/json
+   *    requestBody:
+   *      required: true
+   *      content:
+   *        application/json:
+   *          schema:
+   *            type: object
+   *            properties:
+   *              old_password:
+   *                type: string
+   *                required: true
+   *                example: password
+   *              password:
+   *                type: string
+   *                required: true
+   *                example: password
+   *              password_confirmation:
+   *                type: string
+   *                required: true
+   *                example: password
+   *    responses:
+   *      200:
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Unauthorized
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/Unauthorized'
+   *      500:
+   *        description: Internal Server Error
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/InternalServerError'
+   */
   public async updatePassword({ auth, request, response, i18n }: HttpContextContract) {
     const option = { trim: true }
     const rule = [rules.minLength(8), rules.maxLength(255), rules.alphaNum()]
