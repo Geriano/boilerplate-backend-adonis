@@ -1,7 +1,8 @@
-name: 'boilerplate-production'
+name: 'boilerplate-adonis'
 version: '3.1'
 services:
   database:
+    container_name: boilerplate-adonis-database
     image: postgres
     environment:
       TZ: Asia/Jakarta
@@ -11,6 +12,7 @@ services:
     ports:
       - 5432:5432
   app:
+    container_name: boilerplate-adonis-app
     depends_on:
       - database
     build: .
@@ -18,4 +20,17 @@ services:
       - .env
     ports:
       - 3333:3333
-    entrypoint: node ace migration:fresh --seed
+    command: node ace serve --watch
+    links:
+      - database
+    volumes:
+      - ./app:/backend/app
+      - ./commands:/backend/commands
+      - ./config:/backend/config
+      - ./contracts:/backend/contracts
+      - ./database:/backend/database
+      - ./providers:/backend/providers
+      - ./resources:/backend/resources
+      - ./start:/backend/start
+      - ./tests:/backend/tests
+      - ./tmp:/backend/tmp
